@@ -1,6 +1,6 @@
 import "server-only";
 import { generateText } from "ai";
-import { gemini } from "@/app/lib/ai";
+import { gemini } from "@/lib/ai";
 
 /**
  * Query Rewriter for RAG System

@@ -1,5 +1,5 @@
 import "server-only";
-import { env } from "@/app/lib/env";
+import { env } from "@/lib/env";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db/db";

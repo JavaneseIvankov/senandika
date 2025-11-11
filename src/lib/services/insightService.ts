@@ -3,7 +3,7 @@ import "server-only";
 import { db } from "@/lib/db/db";
 import { insight } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { gemini } from "@/app/lib/ai";
+import { gemini } from "@/lib/ai";
 import { generateText } from "ai";
 import { SUMMARY_SYSTEM_PROMPT, buildSummaryPrompt } from "./promptService";
 
