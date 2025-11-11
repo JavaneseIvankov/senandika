@@ -1,6 +1,6 @@
 import "server-only";
 import { embed } from "ai";
-import { gemini } from "@/app/lib/ai";
+import { gemini } from "@/lib/ai";
 
 /**
  * Generate embedding vector for a text using Google's text-embedding-004 model
