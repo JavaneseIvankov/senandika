@@ -1,0 +1,133 @@
+ POST /api/chat 200 in 5.4s (compile: 3ms, render: 5.4s)
+Embedding dimension: 768
+=== STARTING RAG WITH ROLLING SUMMARY ===
+=== LOADED PREVIOUS SUMMARY ===
+Daily summary: Pengguna merasa pusing dan bingung karena akan ada kuis jarkom (jaringan komunikasi). Emosi yang ter...
+Key facts: 2
+Safety flag: false
+
+=== RETRIEVAL RESULTS ===
+User ID: Y8kWBCzKRGp8QY1KgJ8O9Vw42bI3O58t
+Recent messages loaded: 10
+Has previous summary: true
+Salient facts count: 2
+
+=== MEMORY CONTEXT ===
+Memory context: {
+  "recent_turns": [
+    {
+      "role": "user",
+      "text": "Aku ngomong apa sebelumnya? aku kayaknya sebelumnya cerita soal aku yang  pusing karena sesuatu, apa  itu?"
+    },
+    {
+      "role": "assistant",
+      "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+    },
+    {
+      "role": "user",
+      "text": "Halo, apa yang kamu tau tentang aku? apa kita pernah ngobrol sebelumnya?"
+    },
+    {
+      "role": "assistant",
+      "text": "Pusing karena kuis jarkom ya? Bagian mana yang bikin kamu paling bingung nih?"
+    },
+    {
+      "role": "user",
+      "text": "Aku lagi pusing nih, bentar lagi ada kuis jarkom tapi masih bingung sama materinya WKWKKWKWKW"
+    },
+    {
+      "role": "assistant",
+      "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+    },
+    {
+      "role": "user",
+      "text": "Apa yang  kamu inget tentang aku? apakah kita pernah ngobrol sebelumnya?"
+    },
+    {
+      "role": "assistant",
+      "text": "Halo! Kedengerannya lagi bikin panik ya kuis jarkomnya. Ceritain lebih lanjut dong, bagian mana dari materinya yang bikin bingung?"
+    },
+    {
+      "role": "user",
+      "text": "Aku lagi pusing nih, bentar lagi ada kuis jarkom tapi masih bingung sama materinya WKWKKWKWKW"
+    },
+    {
+      "role": "assistant",
+      "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+    }
+  ],
+  "daily_summary": "Pengguna merasa pusing dan bingung karena akan ada kuis jarkom (jaringan komunikasi). Emosi yang terlihat adalah kebingungan dan sedikit kecemasan terkait persiapan kuis. Beban yang dirasakan adalah deadline kuis yang semakin dekat. Belum ada informasi mengenai gangguan fungsi atau keputusan/komitmen pengguna.",
+  "salient_facts": [
+    "Merasa pusing dan bingung dengan materi kuis jarkom.",
+    "Deadline kuis menjadi sumber tekanan."
+  ],
+  "safety_note": null
+}
+=== PAYLOAD DEBUG ===
+{
+  "meta": {
+    "timestamp": "2025-11-11T13:18:36.955Z",
+    "timezone": "Asia/Jakarta",
+    "profile": {
+      "age_group": "mahasiswa",
+      "language": "id",
+      "context": "akademik"
+    },
+    "mood_emoji": "normal",
+    "opening": false
+  },
+  "memory_context": {
+    "recent_turns": [
+      {
+        "role": "user",
+        "text": "Aku ngomong apa sebelumnya? aku kayaknya sebelumnya cerita soal aku yang  pusing karena sesuatu, apa  itu?"
+      },
+      {
+        "role": "assistant",
+        "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+      },
+      {
+        "role": "user",
+        "text": "Halo, apa yang kamu tau tentang aku? apa kita pernah ngobrol sebelumnya?"
+      },
+      {
+        "role": "assistant",
+        "text": "Pusing karena kuis jarkom ya? Bagian mana yang bikin kamu paling bingung nih?"
+      },
+      {
+        "role": "user",
+        "text": "Aku lagi pusing nih, bentar lagi ada kuis jarkom tapi masih bingung sama materinya WKWKKWKWKW"
+      },
+      {
+        "role": "assistant",
+        "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+      },
+      {
+        "role": "user",
+        "text": "Apa yang  kamu inget tentang aku? apakah kita pernah ngobrol sebelumnya?"
+      },
+      {
+        "role": "assistant",
+        "text": "Halo! Kedengerannya lagi bikin panik ya kuis jarkomnya. Ceritain lebih lanjut dong, bagian mana dari materinya yang bikin bingung?"
+      },
+      {
+        "role": "user",
+        "text": "Aku lagi pusing nih, bentar lagi ada kuis jarkom tapi masih bingung sama materinya WKWKKWKWKW"
+      },
+      {
+        "role": "assistant",
+        "text": "Halo! Kayaknya kamu penasaran banget ya apa aku inget tentang kamu. Sejujurnya, aku nggak punya ingatan tentang percakapan kita sebelumnya. Tapi, aku di sini buat dengerin dan nemenin kamu. Ada hal lain yang pengen kamu ceritain?"
+      }
+    ],
+    "daily_summary": "Pengguna merasa pusing dan bingung karena akan ada kuis jarkom (jaringan komunikasi). Emosi yang terlihat adalah kebingungan dan sedikit kecemasan terkait persiapan kuis. Beban yang dirasakan adalah deadline kuis yang semakin dekat. Belum ada informasi mengenai gangguan fungsi atau keputusan/komitmen pengguna.",
+    "salient_facts": [
+      "Merasa pusing dan bingung dengan materi kuis jarkom.",
+      "Deadline kuis menjadi sumber tekanan."
+    ],
+    "safety_note": null
+  },
+  "curhat": "Aku ngomong apa sebelumnya? aku kayaknya sebelumnya cerita soal aku yang  pusing karena sesuatu, apa  itu?"
+}
+Embedding dimension: 768
+ POST /api/chat 200 in 8.6s (compile: 2ms, render: 8.6s)
+Embedding dimension: 768
