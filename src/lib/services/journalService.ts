@@ -1,6 +1,10 @@
 import "server-only";
 import { db } from "@/lib/db/db";
-import { memory, reflectionSession, rollingSummary } from "@/lib/db/schema/schema";
+import {
+  memory,
+  reflectionSession,
+  rollingSummary,
+} from "@/lib/db/schema/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { getEmbedding } from "./embeddingService";
 import type { RollingSummary } from "./rollingSummaryService";
@@ -303,9 +307,11 @@ export async function getSessionWithMessages(sessionId: string): Promise<{
  */
 export async function getSessionMessagesForSummary(
   sessionId: string,
-): Promise<Array<{ role: "user" | "assistant"; text: string; timestamp: Date }>> {
+): Promise<
+  Array<{ role: "user" | "assistant"; text: string; timestamp: Date }>
+> {
   const messages = await getMessagesBySession(sessionId);
-  
+
   return messages.map((m) => ({
     role: m.role,
     text: m.text,

@@ -2,35 +2,37 @@
 
 import { getCurrentUser } from "@/lib/auth";
 import {
-   createMemoryEntry,
-   createSession,
-   endSession,
-   getRecentMemories,
-   getSessionWithMessages,
-   getUserSessions,
-   validateSessionOwner,
-   getLatestRollingSummary,
-   saveRollingSummary,
-   getSessionMessagesForSummary,
+  createMemoryEntry,
+  createSession,
+  endSession,
+  getRecentMemories,
+  getSessionWithMessages,
+  getUserSessions,
+  validateSessionOwner,
+  getLatestRollingSummary,
+  saveRollingSummary,
+  getSessionMessagesForSummary,
 } from "@/lib/services/journalService";
 import {
-   CORE_SYSTEM_PROMPT,
-   CRISIS_RESPONSE_ADDITION,
-   buildCurhatPayload,
-   splitCoachOutput,
+  CORE_SYSTEM_PROMPT,
+  CRISIS_RESPONSE_ADDITION,
+  buildCurhatPayload,
 } from "@/lib/services/promptService";
 import { generateRollingSummary } from "@/lib/services/rollingSummaryService";
-import { streamText } from "ai";
+import {
+  processMessageReward,
+  processSessionReward,
+  getUserStats,
+} from "@/lib/services/gamificationService";
+import { generateObject } from "ai";
 import { gemini } from "@/lib/ai";
+import { z } from "zod";
 
 /**
  * [WHAT] Send a message in a journal session dengan STREAMING
  * Returns UIMessageStream dengan TEXT streaming + JSON metadata as data parts
  */
-export async function sendJournalMessageStreaming(
-  sessionId: string,
-  userText: string,
-) {
+export async function sendJournalMessage(sessionId: string, userText: string) {
   // 1. [WHAT] Authentication
   const user = await getCurrentUser();
 
@@ -50,36 +52,39 @@ export async function sendJournalMessageStreaming(
 
   // 4. [WHAT] Get RAG context - ROLLING SUMMARY STRATEGY
   // Strategy: Load previous summary + recent conversation (no search needed!)
-  
+
   console.log("=== STARTING RAG WITH ROLLING SUMMARY ===");
-  
+
   // 4a. Get recent conversation history (last 10 messages for current context)
   const recentMessages = await getRecentMemories(user.id, 10);
-  
+
   // 4b. ⭐ ROLLING SUMMARY: Load previous summary for historical context
   const previousSummary = await getLatestRollingSummary(user.id);
-  
+
   // 4c. Build memory_context with both recent + summary
   let dailySummaryText: string | null = null;
   let salientFacts: string[] = [];
   let safetyNote: string | null = null;
-  
+
   if (previousSummary) {
     // Format summary as structured context
     dailySummaryText = previousSummary.dailySummary;
     salientFacts = previousSummary.keyPoints;
-    
+
     if (previousSummary.safetyFlag) {
-      safetyNote = "⚠️ Terdapat indikasi yang memerlukan perhatian khusus pada percakapan sebelumnya.";
+      safetyNote =
+        "⚠️ Terdapat indikasi yang memerlukan perhatian khusus pada percakapan sebelumnya.";
     }
-    
+
     console.log("=== LOADED PREVIOUS SUMMARY ===");
     console.log("Daily summary:", dailySummaryText.substring(0, 100) + "...");
     console.log("Key facts:", salientFacts.length);
     console.log("Safety flag:", previousSummary.safetyFlag);
   } else {
     console.log("=== NO PREVIOUS SUMMARY ===");
-    console.log("This might be the first conversation or summary hasn't been generated yet.");
+    console.log(
+      "This might be the first conversation or summary hasn't been generated yet.",
+    );
   }
 
   // 5. [WHAT] Build memory_context untuk injection
@@ -99,7 +104,7 @@ export async function sendJournalMessageStreaming(
   console.log("Recent messages loaded:", recentMessages.length);
   console.log("Has previous summary:", !!previousSummary);
   console.log("Salient facts count:", salientFacts.length);
-  
+
   console.log("\n=== MEMORY CONTEXT ===");
   console.log("Memory context:", JSON.stringify(memoryContext, null, 2));
 
@@ -119,31 +124,68 @@ export async function sendJournalMessageStreaming(
   console.log("=== PAYLOAD DEBUG ===");
   console.log(payload);
 
-  // 7. [WHAT] Generate response (non-streaming for simplicity)
-  const result = streamText({
+  // 7. [WHAT] Generate structured response with generateObject
+  const { object: coachResponse } = await generateObject({
     model: gemini("gemini-2.0-flash"),
+    schema: z.object({
+      analysis: z.object({
+        emotions: z
+          .array(z.string())
+          .describe("Array of emotions from the predefined list"),
+        stress_score: z.number().min(0).max(100).describe("Stress score 0-100"),
+        topics: z
+          .array(z.string())
+          .describe("Array of topics from the predefined list"),
+        risk_flag: z
+          .enum(["none", "low", "moderate", "high", "critical"])
+          .describe("Risk assessment flag"),
+      }),
+      conversation_control: z.object({
+        need_clarification: z
+          .boolean()
+          .describe("Whether clarification is needed"),
+        clarify_question: z
+          .string()
+          .optional()
+          .describe("Clarification question if needed"),
+        offer_suggestions: z.boolean().describe("Whether to offer suggestions"),
+        phase: z
+          .enum(["listen", "suggest"])
+          .describe("Current conversation phase"),
+      }),
+      coach_reply: z
+        .string()
+        .describe("Empathetic response in Bahasa Indonesia (≤120 words)"),
+      suggested_actions: z
+        .array(z.any())
+        .describe(
+          "0-3 suggested actions as objects with action name and params",
+        ),
+      actions_explained: z
+        .string()
+        .describe("Practical explanation paragraph for the actions"),
+      gamification: z.object({
+        streak_increment: z.boolean().describe("Whether to increment streak"),
+        potential_badge: z
+          .string()
+          .optional()
+          .describe("Badge name if applicable"),
+      }),
+    }),
     system: CORE_SYSTEM_PROMPT,
     prompt: payload,
   });
 
-  // Wait for complete response
-  const fullText = await result.text;
-
-  // Parse to separate coach reply from JSON metadata
-  const { coachReply, metadata } = splitCoachOutput(fullText);
-
-  // Add crisis resources if needed
-  let finalReply = coachReply;
-  if (metadata) {
-    if (
-      metadata.analysis.risk_flag === "high" ||
-      metadata.analysis.risk_flag === "critical"
-    ) {
-      finalReply += CRISIS_RESPONSE_ADDITION;
-    }
+  // 8. [WHAT] Add crisis resources if needed
+  let finalReply = coachResponse.coach_reply;
+  if (
+    coachResponse.analysis.risk_flag === "high" ||
+    coachResponse.analysis.risk_flag === "critical"
+  ) {
+    finalReply += CRISIS_RESPONSE_ADDITION;
   }
 
-  // Save to DB
+  // 9. [WHAT] Save to DB
   await createMemoryEntry({
     userId: user.id,
     sessionId: sessionId,
@@ -151,15 +193,44 @@ export async function sendJournalMessageStreaming(
     text: finalReply,
   });
 
-  // Return as JSON (non-streaming)
-  return Response.json({
+  // 10. [WHAT] Process gamification rewards
+  // Check if this is first message of the day
+  const userStats = await getUserStats(user.id);
+  const isFirstMessageOfDay = !userStats?.lastActiveDate ||
+    new Date(userStats.lastActiveDate).toDateString() !== new Date().toDateString();
+
+  const gamificationReward = await processMessageReward(
+    user.id,
+    sessionId,
+    isFirstMessageOfDay,
+  );
+
+  // 11. [WHAT] Return plain object (not Response) for server action serialization
+  return {
     message: {
       id: crypto.randomUUID(),
-      role: "assistant",
+      role: "assistant" as const,
       content: finalReply,
     },
-    metadata: metadata || null,
-  });
+    metadata: {
+      analysis: coachResponse.analysis,
+      conversation_control: coachResponse.conversation_control,
+      suggested_actions: coachResponse.suggested_actions,
+      actions_explained: coachResponse.actions_explained,
+      gamification: {
+        ...coachResponse.gamification,
+        reward: {
+          xpGained: gamificationReward.xpGained,
+          totalXP: gamificationReward.totalXP,
+          level: gamificationReward.level,
+          leveledUp: gamificationReward.leveledUp,
+          streakDays: gamificationReward.streakDays,
+          streakBroken: gamificationReward.streakBroken,
+          badgesEarned: gamificationReward.badgesEarned,
+        },
+      },
+    },
+  };
 }
 
 /**
@@ -169,7 +240,17 @@ export async function startJournalSession(moodAtStart: string | null = null) {
   const user = await getCurrentUser();
 
   const session = await createSession(user.id, moodAtStart);
-  return session;
+
+  // Convert Date objects to ISO strings for client serialization
+  return {
+    id: session.id,
+    userId: session.userId,
+    topic: session.topic,
+    startedAt: session.startedAt.toISOString(),
+    endedAt: session.endedAt ? session.endedAt.toISOString() : null,
+    moodAtStart: session.moodAtStart,
+    moodAtEnd: session.moodAtEnd,
+  };
 }
 
 /**
@@ -193,26 +274,47 @@ export async function endJournalSession(
   // ⭐ GENERATE ROLLING SUMMARY after session ends
   console.log("=== GENERATING ROLLING SUMMARY FOR SESSION ===");
   console.log("Session ID:", sessionId);
-  
+
+  let sessionMessageCount = 0;
+  let averageStressScore: number | undefined;
+
   try {
     // Get all messages from this session
     const sessionMessages = await getSessionMessagesForSummary(sessionId);
-    
+    sessionMessageCount = sessionMessages.length;
+
     if (sessionMessages.length > 0) {
+      // Calculate average stress score from session (from assistant messages only)
+      const stressScores: number[] = [];
+      for (const msg of sessionMessages) {
+        if (msg.role === "assistant" && typeof (msg as unknown as Record<string, unknown>).meta === "object") {
+          const meta = (msg as unknown as { meta?: { analysis?: { stress_score?: number } } }).meta;
+          if (meta?.analysis?.stress_score) {
+            stressScores.push(meta.analysis.stress_score);
+          }
+        }
+      }
+
+      if (stressScores.length > 0) {
+        averageStressScore =
+          stressScores.reduce((sum, score) => sum + score, 0) /
+          stressScores.length;
+      }
+
       // Get previous summary for carry-over notes
       const previousSummary = await getLatestRollingSummary(user.id);
       const carryOverNotes = previousSummary?.dailySummary;
-      
+
       // Generate new rolling summary
       const newSummary = await generateRollingSummary(
         sessionMessages,
         undefined, // TODO: Add analytics if available
         carryOverNotes,
       );
-      
+
       // Save the summary
       await saveRollingSummary(user.id, sessionId, newSummary);
-      
+
       console.log("=== ROLLING SUMMARY SAVED ===");
       console.log("Summary length:", newSummary.dailySummary.length);
       console.log("Key points:", newSummary.keyPoints.length);
@@ -225,7 +327,39 @@ export async function endJournalSession(
     // Don't fail the session end if summary generation fails
   }
 
-  return { success: true };
+  // ⭐ PROCESS GAMIFICATION REWARDS
+  console.log("=== PROCESSING GAMIFICATION REWARDS ===");
+  let gamificationReward: Awaited<ReturnType<typeof processSessionReward>> | undefined;
+
+  try {
+    gamificationReward = await processSessionReward(user.id, sessionId, {
+      messageCount: sessionMessageCount,
+      stressScore: averageStressScore,
+    });
+
+    console.log("=== GAMIFICATION REWARDS CALCULATED ===");
+    console.log("XP gained:", gamificationReward.xpGained);
+    console.log("Level:", gamificationReward.level);
+    console.log("Leveled up:", gamificationReward.leveledUp);
+    console.log("Badges earned:", gamificationReward.badgesEarned);
+  } catch (error) {
+    console.error("Error processing gamification rewards:", error);
+    // Don't fail session end if gamification fails
+  }
+
+  return {
+    success: true,
+    gamification: gamificationReward
+      ? {
+          xpGained: gamificationReward.xpGained,
+          totalXP: gamificationReward.totalXP,
+          level: gamificationReward.level,
+          leveledUp: gamificationReward.leveledUp,
+          streakDays: gamificationReward.streakDays,
+          badgesEarned: gamificationReward.badgesEarned,
+        }
+      : undefined,
+  };
 }
 
 /**
@@ -233,7 +367,18 @@ export async function endJournalSession(
  */
 export async function getJournalSessions() {
   const user = await getCurrentUser();
-  return await getUserSessions(user.id);
+  const sessions = await getUserSessions(user.id);
+
+  // Convert Date objects to ISO strings for client serialization
+  return sessions.map((session) => ({
+    id: session.id,
+    userId: session.userId,
+    topic: session.topic,
+    startedAt: session.startedAt.toISOString(),
+    endedAt: session.endedAt ? session.endedAt.toISOString() : null,
+    moodAtStart: session.moodAtStart,
+    moodAtEnd: session.moodAtEnd,
+  }));
 }
 
 /**
@@ -253,5 +398,20 @@ export async function getJournalSessionDetails(sessionId: string) {
     throw new Error("Session not found");
   }
 
-  return data;
+  // Convert Date objects to ISO strings for client serialization
+  return {
+    session: {
+      id: data.session.id,
+      userId: data.session.userId,
+      topic: data.session.topic,
+      startedAt: data.session.startedAt.toISOString(),
+      endedAt: data.session.endedAt ? data.session.endedAt.toISOString() : null,
+      moodAtStart: data.session.moodAtStart,
+      moodAtEnd: data.session.moodAtEnd,
+    },
+    messages: data.messages.map((msg) => ({
+      ...msg,
+      createdAt: msg.createdAt.toISOString(),
+    })),
+  };
 }
