@@ -5,7 +5,7 @@ export default function footer() {
         <div className="w-[100px] h-[100px] rounded-full bg-yellow-300"></div>
       </div>
       <div className="flex justify-start items-center w-[40%] h-[100px]">
-        <h1>@Copyright</h1>
+        <h1>@ 2025 Senandika</h1>
       </div>
     </footer>
   )
