@@ -12,6 +12,8 @@ import {
   getLatestRollingSummary,
   saveRollingSummary,
   getSessionMessagesForSummary,
+  getActiveSession,
+  getMessagesBySession,
 } from "@/lib/services/journalService";
 import {
   CORE_SYSTEM_PROMPT,
@@ -126,7 +128,7 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
 
   // 7. [WHAT] Generate structured response with generateObject
   const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.0-flash"),
+    model: gemini("gemini-2.5-flash"),
     schema: z.object({
       analysis: z.object({
         emotions: z
@@ -152,6 +154,9 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
         phase: z
           .enum(["listen", "suggest"])
           .describe("Current conversation phase"),
+        confirm_endconv: z
+          .boolean()
+          .describe("Whether to confirm ending conversation"),
       }),
       coach_reply: z
         .string()
@@ -177,7 +182,8 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
   });
 
   // 8. [WHAT] Add crisis resources if needed
-  let finalReply = coachResponse.coach_reply;
+  let finalReply = `${coachResponse.coach_reply}${coachResponse.actions_explained ? `\n${coachResponse.actions_explained}` : ""}
+  `;
   if (
     coachResponse.analysis.risk_flag === "high" ||
     coachResponse.analysis.risk_flag === "critical"
@@ -196,8 +202,10 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
   // 10. [WHAT] Process gamification rewards
   // Check if this is first message of the day
   const userStats = await getUserStats(user.id);
-  const isFirstMessageOfDay = !userStats?.lastActiveDate ||
-    new Date(userStats.lastActiveDate).toDateString() !== new Date().toDateString();
+  const isFirstMessageOfDay =
+    !userStats?.lastActiveDate ||
+    new Date(userStats.lastActiveDate).toDateString() !==
+      new Date().toDateString();
 
   const gamificationReward = await processMessageReward(
     user.id,
@@ -230,6 +238,61 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
         },
       },
     },
+  };
+}
+
+/**
+ * [WHAT] Generate an opening message based on the session's moodAtStart
+ * Uses CORE_SYSTEM_PROMPT with empty user prompt to get a contextual greeting
+ */
+export async function getOpeningMessage(sessionId: string) {
+  // 1. [WHAT] Authentication
+  const user = await getCurrentUser();
+
+  // 2. [WHAT] Validate ownership and get session
+  const isValidOwner = await validateSessionOwner(sessionId, user.id);
+  if (!isValidOwner) {
+    throw new Error("Forbidden: Session does not belong to user");
+  }
+
+  const sessionData = await getSessionWithMessages(sessionId);
+  if (!sessionData) {
+    throw new Error("Session not found");
+  }
+
+  const mood = sessionData.session.moodAtStart || "normal";
+
+  console.log("=== GENERATING OPENING MESSAGE ===");
+  console.log("User ID:", user.id);
+  console.log("Session ID:", sessionId);
+  console.log("Mood from session:", mood);
+
+  // 3. [WHAT] Generate opening message with AI
+  const { object: openingResponse } = await generateObject({
+    model: gemini("gemini-2.5-flash"),
+    schema: z.object({
+      greeting: z
+        .string()
+        .describe(
+          "Warm, empathetic opening message in Bahasa Indonesia (≤80 words)",
+        ),
+      prompt_suggestion: z
+        .string()
+        .describe("Gentle prompt to encourage user to share (≤40 words)"),
+    }),
+    system: CORE_SYSTEM_PROMPT,
+    prompt: `User is starting a new reflection session with mood: "${mood}". Generate a warm, personalized opening message that acknowledges their mood and invites them to share what's on their mind. Keep it conversational and supportive.`,
+  });
+
+  console.log("=== OPENING MESSAGE GENERATED ===");
+  console.log("Greeting:", openingResponse.greeting);
+  console.log("Prompt:", openingResponse.prompt_suggestion);
+
+  // 4. [WHAT] Return the opening message
+  return {
+    greeting: openingResponse.greeting,
+    promptSuggestion: openingResponse.prompt_suggestion,
+    fullMessage: `${openingResponse.greeting}\n\n${openingResponse.prompt_suggestion}`,
   };
 }
 
@@ -287,8 +350,15 @@ export async function endJournalSession(
       // Calculate average stress score from session (from assistant messages only)
       const stressScores: number[] = [];
       for (const msg of sessionMessages) {
-        if (msg.role === "assistant" && typeof (msg as unknown as Record<string, unknown>).meta === "object") {
-          const meta = (msg as unknown as { meta?: { analysis?: { stress_score?: number } } }).meta;
+        if (
+          msg.role === "assistant" &&
+          typeof (msg as unknown as Record<string, unknown>).meta === "object"
+        ) {
+          const meta = (
+            msg as unknown as {
+              meta?: { analysis?: { stress_score?: number } };
+            }
+          ).meta;
           if (meta?.analysis?.stress_score) {
             stressScores.push(meta.analysis.stress_score);
           }
@@ -329,7 +399,9 @@ export async function endJournalSession(
 
   // ⭐ PROCESS GAMIFICATION REWARDS
   console.log("=== PROCESSING GAMIFICATION REWARDS ===");
-  let gamificationReward: Awaited<ReturnType<typeof processSessionReward>> | undefined;
+  let gamificationReward:
+    | Awaited<ReturnType<typeof processSessionReward>>
+    | undefined;
 
   try {
     gamificationReward = await processSessionReward(user.id, sessionId, {
@@ -413,5 +485,114 @@ export async function getJournalSessionDetails(sessionId: string) {
       ...msg,
       createdAt: msg.createdAt.toISOString(),
     })),
+  };
+}
+
+/**
+ * [WHAT] Get active session with messages for current user
+ * Used for auto-attaching to existing session
+ */
+export async function getActiveSessionWithMessages() {
+  const user = await getCurrentUser();
+
+  const activeSession = await getActiveSession(user.id);
+
+  if (!activeSession) {
+    return null;
+  }
+
+  const messages = await getMessagesBySession(activeSession.id);
+
+  return {
+    session: {
+      id: activeSession.id,
+      startedAt: activeSession.startedAt.toISOString(),
+      endedAt: activeSession.endedAt?.toISOString() || null,
+    },
+    messages: messages.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.text,
+      timestamp: m.createdAt.toISOString(),
+    })),
+  };
+}
+
+/**
+ * [WHAT] Confirm and end conversation
+ * Called when user clicks "Ya" on end session confirmation
+ */
+export async function confirmEndSession(sessionId: string) {
+  const user = await getCurrentUser();
+
+  // Validate ownership
+  const isValidOwner = await validateSessionOwner(sessionId, user.id);
+  if (!isValidOwner) {
+    throw new Error("Forbidden: Session does not belong to user");
+  }
+
+  // Send special message to AI indicating user confirmed ending
+  const payload = buildCurhatPayload("", {
+    profile: {
+      age_group: "mahasiswa",
+      language: "id",
+      context: "akademik",
+    },
+    moodEmoji: "normal",
+    memoryContext: undefined,
+    opening: false,
+    endConvResponse: true, // Signal to AI for closing message
+  });
+
+  // Define response schema
+  const schema = z.object({
+    analysis: z.object({
+      emotions: z.array(z.string()),
+      stress_score: z.number().min(0).max(100),
+      topics: z.array(z.string()),
+      risk_flag: z.enum(["none", "low", "moderate", "high", "critical"]),
+    }),
+    conversation_control: z.object({
+      need_clarification: z.boolean(),
+      clarify_question: z.string().optional(),
+      offer_suggestions: z.boolean(),
+      phase: z.enum(["listen", "suggest"]),
+      confirm_endconv: z.boolean(),
+    }),
+    coach_reply: z.string(),
+    suggested_actions: z.array(z.any()),
+    actions_explained: z.string(),
+    gamification: z.object({
+      streak_increment: z.boolean(),
+      potential_badge: z.string().optional(),
+    }),
+  });
+
+  // Get AI's closing message
+  const { object: coachResponse } = await generateObject({
+    model: gemini("gemini-2.5-flash-exp"),
+    schema,
+    system: CORE_SYSTEM_PROMPT,
+    prompt: payload,
+  });
+
+  // Save closing message
+  await createMemoryEntry({
+    userId: user.id,
+    sessionId: sessionId,
+    role: "assistant",
+    text: coachResponse.coach_reply,
+  });
+
+  // End the session
+  const result = await endJournalSession(sessionId, "normal");
+
+  return {
+    message: {
+      id: crypto.randomUUID(),
+      content: coachResponse.coach_reply,
+      timestamp: new Date().toISOString(),
+    },
+    gamification: result.gamification,
   };
 }

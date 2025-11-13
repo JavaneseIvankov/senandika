@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { Toaster } from "sonner";
 import "@/shared/styles/globals.css";
 
 const figtree = Figtree({
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={` ${figtree.className} ${spaceGrotesk.className} ${plusJakartaSans.variable} antialiased`}
       >
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
