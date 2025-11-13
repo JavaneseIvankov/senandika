@@ -5,7 +5,7 @@ export default function AboutSection() {
 
   return (
     <section id="about-senandika" className="flex flex-col gap-10 justify-center items-center w-[70%] mx-auto mt-10">
-      <h1 className="text-[56px] text-center font-bold">Tentang Senandika</h1>
+      <h1 className="text-[56px] text-center font-bold">About Senandika</h1>
       <article className="flex flex-row gap-8">
         {about.map((item) => (  
         <Card 
