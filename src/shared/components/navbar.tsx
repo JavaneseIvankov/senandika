@@ -4,6 +4,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "./ui/navigation-menu";
+import Image from "next/image";
 
 const NavLink = [
   { id:1, name: "About Senandika", href: "/#about-senandika"},
@@ -18,7 +19,13 @@ export default function Navbar() {
         <NavigationMenuList className="flex w-full justify-between">
 
             <NavigationMenuItem className="flex justify-center items-center w-full">
-              <div className="w-8 h-8 bg-yellow-400 rounded-full"></div>
+              <Image
+                src="/assets/logo/logo-without-text.png"
+                alt="Senandika Logo"
+                width={50}
+                height={50}
+                className="w-12 h-12 scale-250 rounded-full object-contain"
+              />
               <NavigationMenuLink className="text-[18px] cursor-pointer">Senandika</NavigationMenuLink>
             </NavigationMenuItem>
 
