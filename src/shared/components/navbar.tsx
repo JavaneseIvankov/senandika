@@ -22,8 +22,8 @@ export default function Navbar() {
               <Image
                 src="/assets/logo/logo-without-text.png"
                 alt="Senandika Logo"
-                width={50}
-                height={50}
+                width={200}
+                height={200}
                 className="w-12 h-12 scale-250 rounded-full object-contain"
               />
               <NavigationMenuLink className="text-[18px] cursor-pointer">Senandika</NavigationMenuLink>

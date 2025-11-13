@@ -7,8 +7,8 @@ export default function footer() {
         <Image
           src="/assets/logo/logo-with-text.png"
           alt="Senandika Logo"
-          width={50}
-          height={50}
+          width={500}
+          height={500}
           className="w-20 h-20 scale-250 object-contain"
         />
       </div>
