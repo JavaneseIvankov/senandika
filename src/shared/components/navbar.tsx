@@ -26,7 +26,7 @@ export default function Navbar() {
                 height={200}
                 className="w-12 h-12 scale-250 rounded-full object-contain"
               />
-              <NavigationMenuLink className="text-[18px] cursor-pointer">Senandika</NavigationMenuLink>
+              <NavigationMenuLink className="text-[18px] cursor-pointer pointer-events-none">Senandika</NavigationMenuLink>
             </NavigationMenuItem>
 
         </NavigationMenuList>
@@ -49,7 +49,7 @@ export default function Navbar() {
         <NavigationMenuList className="flex w-full justify-between">
 
             <NavigationMenuItem className="flex-1 w-full">
-              <NavigationMenuLink className="text-[18px] cursor-pointer" href="/login">Login</NavigationMenuLink>
+              <NavigationMenuLink className="text-[18px] cursor-pointer hover:scale-110 transition-transform duration-300" href="/login">Login</NavigationMenuLink>
             </NavigationMenuItem>
 
         </NavigationMenuList>
