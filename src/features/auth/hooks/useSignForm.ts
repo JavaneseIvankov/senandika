@@ -80,10 +80,10 @@ export function useSignForm(type: SchemaType) {
 
           if (result.data) {
             console.log(
-              "✅ [useSignForm] Sign in successful, redirecting to /test",
+              "✅ [useSignForm] Sign in successful, redirecting to /dashboard/chat",
             );
             // Client-side auth automatically sets cookies
-            window.location.href = "/test";
+            window.location.href = "/dashboard/chat";
           } else if (result.error) {
             console.error(
               "❌ [useSignForm] Sign in error from API:",
@@ -116,10 +116,10 @@ export function useSignForm(type: SchemaType) {
 
           if (result.data) {
             console.log(
-              "✅ [useSignForm] Sign up successful, redirecting to /test",
+              "✅ [useSignForm] Sign up successful, redirecting to /dashboard/chat",
             );
             // Client-side auth automatically sets cookies
-            window.location.href = "/test";
+            window.location.href = "/dashboard/chat";
           } else if (result.error) {
             console.error(
               "❌ [useSignForm] Sign up error from API:",
