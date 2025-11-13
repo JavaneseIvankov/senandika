@@ -33,12 +33,12 @@ export default function DashboardSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <Home className="mr-2" /> Dashboard
+                  <Home href="" className="mr-2" /> Profile
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <Settings className="mr-2" /> Settings
+                  <Settings className="mr-2" /> Chat
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

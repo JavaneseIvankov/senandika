@@ -2,7 +2,7 @@ import ChatSection from "../components/chat-section"
 
 export default function ChatContainer() {
   return (
-    <main className="pt-5">
+    <main className="mt-5">
       <ChatSection />  
     </main>
   )
