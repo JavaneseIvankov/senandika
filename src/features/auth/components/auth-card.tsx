@@ -85,9 +85,6 @@ export default function AuthCard() {
               )}
 
               <div className="flex flex-col justify-center items-center gap-4">
-                <a href="/" className="text-center text-[14px] hover:underline">
-                  Forget Your Password?
-                </a>
                 <Button
                   type="submit"
                   disabled={isSignInPending}
@@ -190,9 +187,6 @@ export default function AuthCard() {
               )}
 
               <div className="flex flex-col justify-center items-center gap-4">
-                <a href="/" className="text-center text-[14px] hover:underline">
-                  Forget Your Password?
-                </a>
                 <Button
                   type="submit"
                   disabled={isSignUpPending}

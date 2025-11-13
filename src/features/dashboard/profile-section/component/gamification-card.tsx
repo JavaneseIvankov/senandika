@@ -31,7 +31,7 @@ export default function GamificationCard() {
               
               <CardContent>
                 <p className='text-[26px] text-purple-600'>{level.level}</p>
-                <p className='text-gray-600'>{level.xp}</p>
+                <p className='text-[12px] text-gray-600'>{level.xp}</p>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-purple-600 h-2 rounded-full transition-all duration-500"
