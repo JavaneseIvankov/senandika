@@ -48,7 +48,7 @@ export async function generateDailySummary(
 
     // 2. Call Gemini API to generate summary
     const result = await generateText({
-      model: gemini("gemini-2.0-flash"),
+      model: gemini("gemini-2.5-flash"),
       system: SUMMARY_SYSTEM_PROMPT,
       prompt: prompt,
     });
