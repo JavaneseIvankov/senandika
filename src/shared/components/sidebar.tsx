@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "./ui/sidebar"
-
+import Link from "next/link"
 import { Home, Settings } from "lucide-react"
 
 export default function DashboardSidebar() {
@@ -32,14 +32,18 @@ export default function DashboardSidebar() {
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Home href="" className="mr-2" /> Profile
-                </SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/dashboard/profile" className="flex items-center">
+                  <Home className="mr-2" /> Profile
+                </Link>
+              </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton>
+              <SidebarMenuButton asChild>
+                <Link href="/dashboard/chat" className="flex items-center">
                   <Settings className="mr-2" /> Chat
-                </SidebarMenuButton>
+                </Link>
+              </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
