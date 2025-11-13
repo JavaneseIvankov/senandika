@@ -22,7 +22,15 @@ const formSchema = z.object({
 export default function AuthCard() {
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const formSignIn = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    }
+  })
+
+  const formSignUp = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -40,14 +48,14 @@ export default function AuthCard() {
       <CardContent className="relative flex flex-row h-full px-0">
 
         {/* Sign In */}
-        <div className={`flex flex-col justify-center items-center w-[70%] h-full py-12 px-4 gap-4 transition-all duration-700 ease-in-oute ${isSignUp ? "animate-move" : "animate-move"}`}>
+        <div className={`flex flex-col justify-center w-[70%] h-full py-12 px-8 gap-4 transition-all duration-700 ease-in-oute ${isSignUp ? "animate-move" : "animate-move"}`}>
           <h1 className="text-[30px] text-center font-bold">Sign In</h1>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Form {...formSignIn}>
+            <form onSubmit={formSignIn.handleSubmit(onSubmit)}>
 
               {/* Username Field */ }
               <FormField
-                control={form.control}
+                control={formSignIn.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -61,7 +69,7 @@ export default function AuthCard() {
 
               {/* Password Field */ }
               <FormField
-                control={form.control}
+                control={formSignIn.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -82,14 +90,14 @@ export default function AuthCard() {
         </div>
 
         {/* Sign Up */}
-        <div className={`flex flex-col justify-center items-center w-[70%] h-full py-12 px-4  gap-4 transition-all duration-700 ease-in-out ${isSignUp ? "animate-move" : "animate-move"}`}>
+        <div className={`flex flex-col justify-center w-[70%] h-full py-12 px-8 gap-4 transition-all duration-700 ease-in-out ${isSignUp ? "animate-move" : "animate-move"}`}>
           <h1 className="text-[30px] text-center font-bold">Sign Up</h1>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Form {...formSignUp}>
+            <form onSubmit={formSignUp.handleSubmit(onSubmit)}>
 
               {/* Email Field */ }
               <FormField
-                control={form.control}
+                control={formSignUp.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -103,7 +111,7 @@ export default function AuthCard() {
 
               {/* Password Field */ }
               <FormField
-                control={form.control}
+                control={formSignUp.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -117,7 +125,7 @@ export default function AuthCard() {
 
               {/* Confirm Password Field */ }
               <FormField
-                control={form.control}
+                control={formSignUp.control}
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
