@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <DashboardSidebar />
       <SidebarInset>
         <main className="p-6">
-          <SidebarTrigger />
+          <SidebarTrigger className="cursor-pointer"/>
           {children}
         </main>
       </SidebarInset>
