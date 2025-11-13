@@ -13,7 +13,7 @@ export default function footer() {
         />
       </div>
       <div className="flex justify-start items-center w-[40%] h-[100px]">
-        <h1>@ 2025 Senandika</h1>
+        <h1>@Copyright | 2025 Senandika</h1>
       </div>
     </footer>
   )
