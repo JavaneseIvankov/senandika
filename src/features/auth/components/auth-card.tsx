@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from "zod";
+import {useSignForm } from "../hooks/useSignForm";
 import { Card, CardContent } from "@/shared/components/ui/card"; 
 import {
   Form,
@@ -13,45 +11,20 @@ import {
   FormField } from "@/shared/components/ui/form";
 import { Button } from "@/shared/components/ui/button"
 
-const formSchema = z.object({
-  email: z.string().email("Email tidak valid"),
-  password: z.string().min(6, "Minimal 6 karakter"),
-  confirmPassword: z.string().min(6, "Password tidak sama"),
-})
-
 export default function AuthCard() {
   const [isSignUp, setIsSignUp] = useState(false);
-
-  const formSignIn = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    }
-  })
-
-  const formSignUp = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-    }
-  })
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  const { form: formSignIn, onSubmit: onSignIn } = useSignForm("signIn");
+  const { form: formSignUp, onSubmit: onSignUp } = useSignForm("signUp");
 
   return (
     <Card className={`relative w-[50%] h-[70vh] p-0 px-0 rounded-4xl transition-all duration-700 ease-in-out ${isSignUp ? "animate-move" : "animate-move"}`}>
       <CardContent className="relative flex flex-row h-full px-0">
 
         {/* Sign In */}
-        <div className={`flex flex-col justify-center w-[70%] h-full py-12 px-8 gap-4 transition-all duration-700 ease-in-oute ${isSignUp ? "animate-move" : "animate-move"}`}>
+        <div className={`flex flex-col justify-center w-[70%] h-full py-12 px-8 gap-4 transition-all duration-700 ease-in-out ${isSignUp ? "animate-move" : "animate-move"}`}>
           <h1 className="text-[30px] text-center font-bold">Sign In</h1>
           <Form {...formSignIn}>
-            <form onSubmit={formSignIn.handleSubmit(onSubmit)}>
+            <form onSubmit={formSignIn.handleSubmit(onSignIn)}>
 
               {/* Username Field */ }
               <FormField
@@ -93,7 +66,21 @@ export default function AuthCard() {
         <div className={`flex flex-col justify-center w-[70%] h-full py-12 px-8 gap-4 transition-all duration-700 ease-in-out ${isSignUp ? "animate-move" : "animate-move"}`}>
           <h1 className="text-[30px] text-center font-bold">Sign Up</h1>
           <Form {...formSignUp}>
-            <form onSubmit={formSignUp.handleSubmit(onSubmit)}>
+            <form onSubmit={formSignUp.handleSubmit(onSignUp)}>
+
+              {/* UserName Field */ }
+              <FormField
+                control={formSignUp.control}
+                name="userName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl className="mb-4 border rounded-2xl px-4 py-1">
+                      <input className="text-[12px]" placeholder="Masukkan username" {...field}/>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               {/* Email Field */ }
               <FormField
@@ -101,9 +88,9 @@ export default function AuthCard() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl className="mb-4 border rounded-2xl px-4 py-1">
-                      <input className="text-[12px]" placeholder="Masukkan username" {...field}/>
+                      <input className="text-[12px]" placeholder="Masukkan email" {...field}/>
                     </FormControl>
                   </FormItem>
                 )}
