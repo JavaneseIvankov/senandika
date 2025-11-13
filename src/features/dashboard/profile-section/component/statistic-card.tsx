@@ -1,9 +1,7 @@
 import { Card, CardContent, CardDescription, CardTitle } from "@/shared/components/ui/card";
-import { dataProfile } from '../data/profile-data';
+import { ChartLineLinear } from "./chart-card";
 
 export default function StatisticCard() {
-  const profile = dataProfile[0];
-
   return (
     <section>
       <Card>
@@ -13,6 +11,7 @@ export default function StatisticCard() {
           </CardTitle>
           <CardDescription className="flex flex-col gap-4">
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloremque, autem voluptatibus! Quae laboriosam quod dolores cum assumenda corrupti adipisci cupiditate doloremque in? Nemo, necessitatibus ducimus!</p>
+            <ChartLineLinear />
           </CardDescription>
         </CardContent>
       </Card>
