@@ -19,7 +19,6 @@ import { Home, Settings } from "lucide-react"
 
 export default function DashboardSidebar() {
   return (
-    <SidebarProvider>
       <Sidebar> 
         {/* Bagian sidebar-nya */}
         <SidebarHeader className="flex flex-row items-center">
@@ -48,13 +47,7 @@ export default function DashboardSidebar() {
 
         <SidebarFooter>
           <p className="text-xs text-muted-foreground px-2">© 2025 Senandika</p>
-        </SidebarFooter>
+        </SidebarFooter> 
       </Sidebar>
-      <div className="pt-20">
-        <SidebarTrigger/>
-      </div>   
-    </SidebarProvider>
   )
 }
-
-

@@ -2,7 +2,7 @@ import ProfileContainer from "@/features/dashboard/profile-section/container/pro
 
 export default function Home() {
   return (
-    <main className="flex flex-col justify-center min-h-screen overscroll-y-contain ">
+    <main className="flex flex-col justify-center items-center min-h-screen overscroll-y-contain ">
       <ProfileContainer />
     </main>
   );
