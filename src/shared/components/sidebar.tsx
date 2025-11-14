@@ -28,7 +28,7 @@ export default function DashboardSidebar() {
             alt="Senandika Logo"
             width={50}
             height={50}
-            className="w-12 h-12 scale-200 rounded-full object-contain"
+            className="w-12 h-12 scale-100 rounded-full object-contain"
           />
           <h1 className="text-lg font-bold px-2">Senandika</h1>
         </SidebarHeader>

@@ -23,7 +23,7 @@ export const ChatInput = React.memo(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      if (e.key === "Enter" && !e.shiftKey){
         e.preventDefault();
         handleSubmit(e as unknown as React.FormEvent);
       }
@@ -31,21 +31,21 @@ export const ChatInput = React.memo(
 
     return (
       <CardFooter className={cn("p-4 border-t", className)}>
-        <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+        <form onSubmit={handleSubmit} className="flex justify-center items-center gap-2 w-full">
           <Textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={isLoading || disabled}
-            className="min-h-[44px] max-h-[120px] resize-none flex-1"
+            className="min-h-11 max-h-[120px] resize-none flex-1"
             rows={1}
           />
           <Button
             type="submit"
             disabled={isLoading || !value.trim() || disabled}
             size="icon"
-            className="flex-shrink-0"
+            className="hrink-0"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

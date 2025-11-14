@@ -9,7 +9,7 @@ interface GamificationStatsCompactProps {
   userId?: string;
 }
 
-export function GamificationStatsCompact({
+export default function GamificationStatsCompact({
   userId,
 }: GamificationStatsCompactProps) {
   const [stats, setStats] = useState<{

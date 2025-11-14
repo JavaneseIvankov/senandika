@@ -18,7 +18,7 @@ export const ChatHeader = React.memo(
               {session.endedAt ? (
                 <span className="text-muted-foreground">● Session ended</span>
               ) : (
-                <span className="text-primary">● Active</span>
+                <span className="text-green-500">● Active</span>
               )}
               <Separator orientation="vertical" className="h-4" />
               <span>{messageCount} messages</span>

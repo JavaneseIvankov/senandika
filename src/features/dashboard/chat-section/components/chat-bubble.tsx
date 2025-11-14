@@ -34,7 +34,7 @@ export const ChatBubble = React.memo(
               : "bg-muted text-foreground",
           )}
         >
-          <p className="text-sm whitespace-pre-wrap break-words">
+          <p className="text-sm whitespace-pre-wrap wrap-break-word">
             {message.content}
           </p>
           <span
@@ -52,7 +52,7 @@ export const ChatBubble = React.memo(
             onClick={onEndSession}
             variant="secondary"
             size="sm"
-            className="text-xs"
+            className="text-xs cursor-pointer hover:scale-90"
           >
             Ya, akhiri percakapan
           </Button>

@@ -570,7 +570,7 @@ export async function confirmEndSession(sessionId: string) {
 
   // Get AI's closing message
   const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.5-flash-exp"),
+    model: gemini("gemini-2.5-flash"),
     schema,
     system: CORE_SYSTEM_PROMPT,
     prompt: payload,

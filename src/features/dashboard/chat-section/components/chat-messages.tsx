@@ -35,7 +35,7 @@ export const ChatMessages = React.memo(
                 {isLoading && <ChatLoading />}
               </>
             )}
-            <div ref={scrollRef} />
+            <div/>
           </div>
         </ScrollArea>
       </CardContent>
