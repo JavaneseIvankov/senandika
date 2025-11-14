@@ -24,7 +24,7 @@ export default function Navbar() {
                 alt="Senandika Logo"
                 width={200}
                 height={200}
-                className="w-12 h-12 scale-250 rounded-full object-contain"
+                className="w-12 h-12 scale-100 rounded-full object-contain"
               />
               <NavigationMenuLink className="text-[18px] cursor-pointer pointer-events-none">Senandika</NavigationMenuLink>
             </NavigationMenuItem>
