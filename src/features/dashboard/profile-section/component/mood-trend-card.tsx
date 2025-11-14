@@ -37,7 +37,7 @@ export default function MoodTrends({ moodTrends, days }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
             <div className="flex gap-4 flex-wrap">
-              <Card className="flex-1 min-w-[160px]">
+              <Card className="flex-1 min-w-40">
                 <CardHeader>
                   <CardTitle>Mood Improvement</CardTitle>
                   <CardDescription>{moodTrends.moodImprovementRate}%</CardDescription>
@@ -47,7 +47,7 @@ export default function MoodTrends({ moodTrends, days }: Props) {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 min-w-[160px]">
+              <Card className="flex-1 min-w-40">
                 <CardHeader>
                   <CardTitle>Avg Stress</CardTitle>
                   <CardDescription>{moodTrends.averageStressScore}/100</CardDescription>
@@ -57,7 +57,7 @@ export default function MoodTrends({ moodTrends, days }: Props) {
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 min-w-[160px]">
+              <Card className="flex-1 min-w-40">
                 <CardHeader>
                   <CardTitle>Trend</CardTitle>
                   <CardDescription className="capitalize">{moodTrends.stressScoreTrend}</CardDescription>
@@ -76,12 +76,12 @@ export default function MoodTrends({ moodTrends, days }: Props) {
                 <CardDescription>Simple line over selected days</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={chartConfig}>
+                <ChartContainer className="flex-1 max-h-[185px]" config={chartConfig}>
                   <LineChart data={stressChartData} margin={{ left: 8, right: 8 }}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="day" tickLine={false} axisLine={false} />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                    <Line dataKey="stress" stroke="var(--color-destructive)" strokeWidth={2} dot={false} />
+                    <Line dataKey="stress" stroke="var(--color-destructive)" strokeWidth={2} dot={true} />
                   </LineChart>
                 </ChartContainer>
               </CardContent>
