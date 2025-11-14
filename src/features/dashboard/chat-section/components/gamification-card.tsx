@@ -31,7 +31,7 @@ export default function GamificationStatsCard({
           variant="ghost"
           size="sm"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 w-8 p-0  cursor-pointer"
+          className="h-8 w-8 p-0 cursor-pointer"
         >
           {isExpanded ? (
             <ChevronUp className="h-4 w-4" />
