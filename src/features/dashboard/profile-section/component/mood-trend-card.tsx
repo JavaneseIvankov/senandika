@@ -81,7 +81,7 @@ export default function MoodTrends({ moodTrends, days }: Props) {
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="day" tickLine={false} axisLine={false} />
                     <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-                    <Line dataKey="stress" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
+                    <Line dataKey="stress" stroke="var(--color-destructive)" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ChartContainer>
               </CardContent>

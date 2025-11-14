@@ -10,7 +10,11 @@ import type { SerializedAnalytics } from "../data/analitycs";
 
 /* Contoh mock data (ganti dengan data nyata dari API / parent props) */
 const mockAnalytics: SerializedAnalytics = {
-  timeRange: { start: new Date().toISOString(), end: new Date().toISOString(), days: 7 },
+  timeRange: {
+    start: new Date().toISOString(),
+    end: new Date().toISOString(),
+    days: 7,
+  },
   sessionStats: {
     totalSessions: 12,
     completedSessions: 9,
@@ -35,13 +39,25 @@ const mockAnalytics: SerializedAnalytics = {
     currentStreak: 5,
     longestStreak: 12,
     totalBadges: 4,
-    recentBadges: [{ code: "BRONZE-1", name: "First Steps", earnedAt: new Date().toISOString() }],
+    recentBadges: [
+      {
+        code: "BRONZE-1",
+        name: "First Steps",
+        earnedAt: new Date().toISOString(),
+      },
+    ],
   },
   summaryInsights: {
     mainInsight: "You are improving steadily",
-    bulletPoints: ["More consistent sessions", "Lower average stress this week"],
+    bulletPoints: [
+      "More consistent sessions",
+      "Lower average stress this week",
+    ],
     encouragement: "Great job — keep the daily habit!",
-    nextSteps: ["Continue short daily reflections", "Try a breathing exercise on high-stress days"],
+    nextSteps: [
+      "Continue short daily reflections",
+      "Try a breathing exercise on high-stress days",
+    ],
   },
 };
 
@@ -51,8 +67,6 @@ export default function ProfileSection() {
   return (
     <main className="flex flex-col gap-8">
       <ProfileCard />
-      <GamificationCard />
-      <StatisticCard />
       <AnalyticsPage analytics={mockAnalytics} />
     </main>
   );
