@@ -10,7 +10,7 @@ export default function ProfileCard() {
       <Card>
         <CardContent>
           <CardTitle className="mb-10">
-            <h1 className="text-[36px] ">Selamat Datang Kembali! <span className="text-purple-600">{profile.userName}</span></h1>
+            <h1 className="text-[36px] font-bold">Selamat Datang Kembali! <span className="text-purple-600">{profile.userName}</span></h1>
           </CardTitle>
           <CardDescription className="flex justify-between items gap-4">
             <div className="flex flex-col justify-center items-center w-[50%] gap-8">
