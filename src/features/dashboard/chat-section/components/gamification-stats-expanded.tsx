@@ -86,22 +86,6 @@ export default function GamificationStatsExpanded({
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
-          <Calendar className="h-4 w-4 text-blue-500 mt-0.5" />
-          <div>
-            <p className="text-xs text-blue-600/70">Total Sessions</p>
-            <p className="text-lg font-semibold text-blue-700">{stats.totalSessions}</p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
-          <Star className="h-4 w-4 text-purple-500 mt-0.5" />
-          <div>
-            <p className="text-xs text-purple-600/70">Messages</p>
-            <p className="text-lg font-semibold text-purple-700">{stats.totalMessages}</p>
-          </div>
-        </div>
-
         <div className="flex items-start gap-2 p-3 bg-linear-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-100">
           <Zap className="h-4 w-4 text-orange-500 mt-0.5" />
           <div>
@@ -110,18 +94,18 @@ export default function GamificationStatsExpanded({
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-yellow-50 to-amber-50 rounded-lg border border-yellow-100">
-          <Target className="h-4 w-4 text-primary mt-0.5" />
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+          <Target className="h-4 w-4 text-purple-500 mt-0.5" />
           <div>
-            <p className="text-xs text-yellow-600/70">Total XP</p>
-            <p className="text-lg font-semibold text-yellow-700">{stats.xp}</p>
+            <p className="text-xs text-purple-600/70">Total XP</p>
+            <p className="text-lg font-semibold text-purple-700">{stats.xp}</p>
           </div>
         </div>
       </div>
 
       {/* Badges Section */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2">
           <Trophy className="h-4 w-4 text-yellow-500" />
           <span className="text-sm font-semibold">
             Badges {loadingBadges ? "" : `(${badges.length})`}
@@ -140,7 +124,7 @@ export default function GamificationStatsExpanded({
               <Badge
                 key={badge.code}
                 variant="secondary"
-                className="cursor-pointer"
+                className="cursor-help"
                 title={badge.description || undefined}
               >
                 {badge.name}
