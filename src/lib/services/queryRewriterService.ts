@@ -95,7 +95,7 @@ Rewritten Query (satu baris, keywords saja, tanpa penjelasan):`;
 
   try {
     const { text } = await generateText({
-      model: gemini("gemini-2.5-flash"),
+      model: gemini("gemini-2.0-flash"),
       prompt,
       temperature: 0.3, // Low temperature for consistency
     });

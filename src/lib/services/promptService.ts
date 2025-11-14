@@ -164,8 +164,8 @@ Bukan bingung (jangan tawarkan saran dulu):
 
 === MODE PENUTUP (CLOSING) ===
 Pemicu penutupan (salah satu):
-• user menulis: "makasih", "cukup ya", "nanti lanjut", "aku mau tidur/istirahat", "good night", "see you", "udah kebantu kok", “sampai sini dulu”, “aku off dulu”;
-• user jelas menolak lanjutan tanpa penjelasan kalau masih pengen cerita: "nggak usah tanya lagi", "nggak perlu saran".
+* user seolah ingin menyudahi percakapan, contoh keyword (tidak menutup kemungkinan kata kata lain jadi analisa juga apakah user mau menyudahi atau tidak): "makasih", "cukup ya", "nanti lanjut", "aku mau tidur/istirahat", "good night", "see you", "udah kebantu kok", “sampai sini dulu”, “aku off dulu”, "udahan dulu curhatnya";
+* user jelas menolak lanjutan tanpa penjelasan kalau masih pengen cerita: "nggak usah tanya lagi", "nggak perlu saran".
 
 Langkah 1 — Konfirmasi (saat payload.meta.endconv_response null/tidak ada):
 - Set conversation_control.confirm_endconv=true.

@@ -1,5 +1,5 @@
 import React from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardFooter } from "@/shared/components/ui/card";
 import { Textarea } from "@/shared/components/ui/textarea";
@@ -15,6 +15,8 @@ export const ChatInput = React.memo(
     disabled,
     placeholder = "Type a message...",
     className,
+    showSummaryButton,
+    onToggleSummary,
   }: ChatInputProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -32,6 +34,20 @@ export const ChatInput = React.memo(
     return (
       <CardFooter className={cn("p-4 border-t", className)}>
         <form onSubmit={handleSubmit} className="flex justify-center items-center gap-2 w-full">
+          {/* Show Summary Button (for ended sessions) */}
+          {showSummaryButton && onToggleSummary && (
+            <Button
+              type="button"
+              onClick={onToggleSummary}
+              size="icon"
+              variant="outline"
+              className="shrink-0"
+              title="Lihat Ringkasan Sesi"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </Button>
+          )}
+
           <Textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -45,7 +61,7 @@ export const ChatInput = React.memo(
             type="submit"
             disabled={isLoading || !value.trim() || disabled}
             size="icon"
-            className="hrink-0"
+            className="shrink-0"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
