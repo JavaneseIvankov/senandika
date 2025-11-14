@@ -10,6 +10,7 @@ import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
 import { ChatErrorDisplay } from "./chat-error-display";
 import { MoodSelectionModal } from "./mood-selection-modal";
+import { SessionEndOverlay, SessionSummaryCard } from "./session-end";
 import type { ChatCardProps } from "../types";
 
 export default function ChatCard({
@@ -19,7 +20,7 @@ export default function ChatCard({
   onSessionStart,
   onSessionEnd,
 }: ChatCardProps) {
-  const [showMoodModal, setShowMoodModal] = useState(true);
+  const [showMoodModal, setShowMoodModal] = useState(false);
 
   const {
     messages,
@@ -28,11 +29,16 @@ export default function ChatCard({
     isLoadingSession,
     error,
     session,
+    sessionStats,
+    showSessionEndOverlay,
+    lastGamificationReward,
     setInput,
     sendMessage,
     clearError,
     startNewSession,
     confirmEndSession,
+    closeSessionEndOverlay,
+    toggleSessionEndOverlay,
     messagesEndRef,
   } = useJournalChat();
 
@@ -57,6 +63,7 @@ export default function ChatCard({
   };
 
   const isDisabled = !session || !!session.endedAt;
+  const isSessionEnded = !!session?.endedAt;
   const placeholder = !session
     ? "Start a session first..."
     : session.endedAt
@@ -86,7 +93,7 @@ export default function ChatCard({
             <p className="text-muted-foreground text-center">
               No active session. Start a new one to begin chatting.
             </p>
-            <Button onClick={handleStartSession}>Start New Session</Button>
+            <Button className="cursor-pointer hover:bg-gray-800 hover:-translate-y-1 active:translate-0" onClick={handleStartSession}>Start New Session</Button>
           </div>
         )}
 
@@ -110,6 +117,8 @@ export default function ChatCard({
               isLoading={isLoading}
               disabled={isDisabled}
               placeholder={placeholder}
+              showSummaryButton={isSessionEnded && !!sessionStats}
+              onToggleSummary={toggleSessionEndOverlay}
             />
           </>
         )}
@@ -120,6 +129,24 @@ export default function ChatCard({
         onMoodSelect={handleMoodSelect}
         onClose={() => setShowMoodModal(false)}
       />
+
+      {/* Session End Overlay */}
+      {sessionStats && (
+        <SessionEndOverlay
+          open={showSessionEndOverlay}
+          onClose={closeSessionEndOverlay}
+        >
+          <SessionSummaryCard
+            stats={sessionStats}
+            gamificationReward={lastGamificationReward}
+            onStartNewSession={() => {
+              closeSessionEndOverlay();
+              handleStartSession();
+            }}
+            onClose={closeSessionEndOverlay}
+          />
+        </SessionEndOverlay>
+      )}
     </>
   );
 }

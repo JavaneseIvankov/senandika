@@ -1,16 +1,40 @@
 "use client";
 
-import { useState, useCallback, useTransition, useRef, useEffect } from "react";
-import type { Message, SessionInfo } from "./types";
+import {
+  useState,
+  useCallback,
+  useTransition,
+  useRef,
+  useEffect,
+  useMemo,
+} from "react";
+import type {
+  Message,
+  SessionInfo,
+  SessionStats,
+  GamificationReward,
+} from "./types";
 import type { CoachResponse } from "@/lib/services/promptService";
 import {
   sendJournalMessage,
   getActiveSessionWithMessages,
   confirmEndSession,
   startJournalSession,
+  getOpeningMessage,
 } from "@/actions/journalActions";
 import { checkAndAwardBadges } from "@/actions/gamificationActions";
 import { toast } from "sonner";
+import {
+  getUserFriendlyError,
+  logErrorDetails,
+} from "@/lib/utils/errorMessages";
+import {
+  emitGamificationUpdate,
+  emitLevelUp,
+  emitBadgeEarned,
+  emitXPGained,
+} from "@/lib/events/gamificationEvents";
+import { formatDuration, calculateAverageStress } from "./utils/sessionHelpers";
 
 export interface UseJournalChatReturn {
   // State
@@ -21,12 +45,19 @@ export interface UseJournalChatReturn {
   error: string | null;
   session: SessionInfo | null;
 
+  // Session End related
+  sessionStats: SessionStats | null;
+  showSessionEndOverlay: boolean;
+  lastGamificationReward: GamificationReward | null;
+
   // Actions
   setInput: (value: string) => void;
   sendMessage: (text: string) => Promise<void>;
   clearError: () => void;
   startNewSession: (mood: string) => Promise<void>;
   confirmEndSession: () => Promise<void>;
+  closeSessionEndOverlay: () => void;
+  toggleSessionEndOverlay: () => void;
 
   // Refs for scroll management
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
@@ -40,8 +71,33 @@ export function useJournalChat(): UseJournalChatReturn {
   const [isPending, startTransition] = useTransition();
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
+  // Session End state
+  const [showSessionEndOverlay, setShowSessionEndOverlay] = useState(false);
+  const [lastGamificationReward, setLastGamificationReward] =
+    useState<GamificationReward | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const badgeCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Computed session stats
+  const sessionStats = useMemo((): SessionStats | null => {
+    if (!session || !session.endedAt) return null;
+
+    const startedAt = new Date(session.startedAt);
+    const endedAt = new Date(session.endedAt);
+    const durationMs = endedAt.getTime() - startedAt.getTime();
+    const durationMinutes = Math.floor(durationMs / 60000);
+
+    return {
+      startedAt: session.startedAt,
+      endedAt: session.endedAt,
+      duration: formatDuration(durationMinutes),
+      messageCount: messages.length,
+      moodAtStart: session.moodAtStart ?? null,
+      moodAtEnd: session.moodAtEnd ?? null,
+      averageStressScore: calculateAverageStress(messages),
+    };
+  }, [session, messages]);
 
   // Badge checking with toast notifications
   const checkBadgesAndNotify = useCallback(async () => {
@@ -70,16 +126,31 @@ export function useJournalChat(): UseJournalChatReturn {
         const data = await getActiveSessionWithMessages();
 
         if (data) {
+          const sessionData = data.session as {
+            id: string;
+            startedAt: string;
+            endedAt: string | null;
+            moodAtStart?: string | null;
+            moodAtEnd?: string | null;
+          };
+
           setSession({
-            id: data.session.id,
-            startedAt: data.session.startedAt,
-            endedAt: data.session.endedAt,
+            id: sessionData.id,
+            startedAt: sessionData.startedAt,
+            endedAt: sessionData.endedAt,
+            moodAtStart: sessionData.moodAtStart ?? null,
+            moodAtEnd: sessionData.moodAtEnd ?? null,
           });
 
           setMessages(data.messages as Message[]);
         }
       } catch (err) {
-        console.error("Failed to load active session:", err);
+        // Log internal error details for debugging
+        logErrorDetails(err, "loadActiveSession");
+
+        // Show user-friendly error message
+        const userFriendlyMessage = getUserFriendlyError(err);
+        setError(userFriendlyMessage);
       } finally {
         setIsLoadingSession(false);
       }
@@ -123,7 +194,9 @@ export function useJournalChat(): UseJournalChatReturn {
     async (text: string) => {
       if (!text.trim()) return;
       if (!session?.id) {
-        setError("No active session. Start a session first.");
+        setError(
+          "Tidak ada sesi aktif. Silakan mulai percakapan terlebih dahulu.",
+        );
         return;
       }
 
@@ -160,11 +233,17 @@ export function useJournalChat(): UseJournalChatReturn {
           if (data.metadata?.gamification?.reward) {
             const reward = data.metadata.gamification.reward;
 
+            // Emit gamification events for real-time updates
+            if (reward.xpGained) {
+              emitXPGained(reward.xpGained, reward.totalXP || 0);
+            }
+
             if (reward.leveledUp) {
               toast.success(`🎉 Level Up!`, {
                 description: `Sekarang kamu level ${reward.level}!`,
                 duration: 5000,
               });
+              emitLevelUp(reward.level || 1, reward.totalXP || 0);
             }
 
             if (reward.badgesEarned && reward.badgesEarned.length > 0) {
@@ -173,13 +252,20 @@ export function useJournalChat(): UseJournalChatReturn {
                   description: badgeCode,
                   duration: 5000,
                 });
+                emitBadgeEarned(badgeCode);
               }
             }
+
+            // General stats update event
+            emitGamificationUpdate();
           }
         } catch (err) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Failed to send message";
-          setError(errorMessage);
+          // Log internal error details for debugging
+          logErrorDetails(err, "sendMessage");
+
+          // Show user-friendly error message
+          const userFriendlyMessage = getUserFriendlyError(err);
+          setError(userFriendlyMessage);
 
           // Remove user message on error
           setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
@@ -198,13 +284,37 @@ export function useJournalChat(): UseJournalChatReturn {
         id: sessionData.id,
         startedAt: sessionData.startedAt,
         endedAt: null,
+        moodAtStart: mood,
+        moodAtEnd: null,
       });
       setMessages([]);
       setError(null);
+
+      // Fetch and display opening message from AI
+      try {
+        const openingData = await getOpeningMessage(sessionData.id);
+
+        // Add opening message to chat
+        const openingMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: openingData.fullMessage,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([openingMessage]);
+      } catch (openingErr) {
+        // Log but don't fail the session creation if opening message fails
+        logErrorDetails(openingErr, "getOpeningMessage");
+        console.error("Failed to get opening message:", openingErr);
+        // Session is still created successfully, just without opening message
+      }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to start session";
-      setError(errorMessage);
+      // Log internal error details for debugging
+      logErrorDetails(err, "startNewSession");
+
+      // Show user-friendly error message
+      const userFriendlyMessage = getUserFriendlyError(err);
+      setError(userFriendlyMessage);
     }
   }, []);
 
@@ -230,30 +340,40 @@ export function useJournalChat(): UseJournalChatReturn {
           prev ? { ...prev, endedAt: new Date().toISOString() } : null,
         );
 
-        // Show gamification rewards
+        // Store gamification reward and show overlay
         if (data.gamification) {
-          const reward = data.gamification;
+          setLastGamificationReward(data.gamification);
 
-          if (reward.leveledUp) {
-            toast.success(`🎉 Level Up!`, {
-              description: `Sekarang kamu level ${reward.level}!`,
-              duration: 5000,
-            });
+          // Emit gamification events for real-time updates
+          if (data.gamification.xpGained) {
+            emitXPGained(data.gamification.xpGained, data.gamification.totalXP || 0);
           }
 
-          if (reward.badgesEarned && reward.badgesEarned.length > 0) {
-            for (const badgeCode of reward.badgesEarned) {
-              toast.success(`🏆 Badge Baru!`, {
-                description: badgeCode,
-                duration: 5000,
-              });
+          if (data.gamification.leveledUp) {
+            emitLevelUp(data.gamification.level || 1, data.gamification.totalXP || 0);
+          }
+
+          if (data.gamification.badgesEarned && data.gamification.badgesEarned.length > 0) {
+            for (const badgeCode of data.gamification.badgesEarned) {
+              emitBadgeEarned(badgeCode);
             }
           }
+
+          // General stats update event
+          emitGamificationUpdate();
         }
+
+        // Show overlay after a brief delay for closing message to appear
+        setTimeout(() => {
+          setShowSessionEndOverlay(true);
+        }, 1000);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to end session";
-        setError(errorMessage);
+        // Log internal error details for debugging
+        logErrorDetails(err, "confirmEndSession");
+
+        // Show user-friendly error message
+        const userFriendlyMessage = getUserFriendlyError(err);
+        setError(userFriendlyMessage);
       }
     });
   }, [session]);
@@ -263,6 +383,16 @@ export function useJournalChat(): UseJournalChatReturn {
     setError(null);
   }, []);
 
+  // Close session end overlay
+  const closeSessionEndOverlay = useCallback(() => {
+    setShowSessionEndOverlay(false);
+  }, []);
+
+  // Toggle session end overlay
+  const toggleSessionEndOverlay = useCallback(() => {
+    setShowSessionEndOverlay((prev) => !prev);
+  }, []);
+
   return {
     messages,
     input,
@@ -270,11 +400,16 @@ export function useJournalChat(): UseJournalChatReturn {
     isLoadingSession,
     error,
     session,
+    sessionStats,
+    showSessionEndOverlay,
+    lastGamificationReward,
     setInput,
     sendMessage,
     clearError,
     startNewSession,
     confirmEndSession: confirmEnd,
+    closeSessionEndOverlay,
+    toggleSessionEndOverlay,
     messagesEndRef,
   };
 }

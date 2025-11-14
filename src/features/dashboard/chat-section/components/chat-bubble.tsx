@@ -1,10 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/components/ui/button";
 import type { ChatBubbleProps } from "../types";
 
 export const ChatBubble = React.memo(
   ({ message, className, onEndSession }: ChatBubbleProps) => {
+    const [hideButton, setHideButton] = useState(false);
+
     const isUser = message.role === "user";
     const formattedTime = new Date(message.timestamp).toLocaleTimeString(
       "id-ID",
@@ -17,6 +21,11 @@ export const ChatBubble = React.memo(
     // Check if AI suggests ending conversation
     const suggestsEndConv =
       !isUser && message.metadata?.conversation_control?.confirm_endconv;
+
+    const handleClick = () => {
+      setHideButton(true);
+      onEndSession?.();
+    }
 
     return (
       <div
@@ -47,12 +56,12 @@ export const ChatBubble = React.memo(
           </span>
         </div>
 
-        {suggestsEndConv && onEndSession && (
+        {!hideButton && suggestsEndConv && onEndSession && (
           <Button
-            onClick={onEndSession}
+            onClick={handleClick}
             variant="secondary"
             size="sm"
-            className="text-xs cursor-pointer hover:scale-90"
+            className="text-xs cursor-pointer hover:scale-90 "
           >
             Ya, akhiri percakapan
           </Button>

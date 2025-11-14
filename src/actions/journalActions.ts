@@ -128,7 +128,7 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
 
   // 7. [WHAT] Generate structured response with generateObject
   const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.5-flash"),
+    model: gemini("gemini-2.0-flash"),
     schema: z.object({
       analysis: z.object({
         emotions: z
@@ -269,7 +269,7 @@ export async function getOpeningMessage(sessionId: string) {
 
   // 3. [WHAT] Generate opening message with AI
   const { object: openingResponse } = await generateObject({
-    model: gemini("gemini-2.5-flash"),
+    model: gemini("gemini-2.0-flash"),
     schema: z.object({
       greeting: z
         .string()
@@ -570,7 +570,7 @@ export async function confirmEndSession(sessionId: string) {
 
   // Get AI's closing message
   const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.5-flash"),
+    model: gemini("gemini-2.0-flash"),
     schema,
     system: CORE_SYSTEM_PROMPT,
     prompt: payload,
