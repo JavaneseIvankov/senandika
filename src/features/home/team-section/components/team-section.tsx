@@ -1,7 +1,7 @@
 export default function TeamSection() {
   return (
     <section id="team" className="flex flex-col justify-center items-center w-[80%] gap-20 mt-20">
-        <div className="text-[56px]">
+        <div className="text-[56px] font-bold">
           <h1>Meet Our Team</h1>
         </div>
         <div className="flex w-full justify-evenly">

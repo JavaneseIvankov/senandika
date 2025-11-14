@@ -10,7 +10,7 @@ interface GamificationStatsExpandedProps {
   userId?: string;
 }
 
-export function GamificationStatsExpanded({
+export default function GamificationStatsExpanded({
   userId,
 }: GamificationStatsExpandedProps) {
   const [stats, setStats] = useState<{
