@@ -33,6 +33,8 @@ export async function getUserGamificationStats() {
       progress: {
         currentLevelXP: 0,
         nextLevelXP: 100,
+        xpInCurrentLevel: 0,
+        xpNeededForLevel: 100,
         progressPercentage: 0,
       },
     };

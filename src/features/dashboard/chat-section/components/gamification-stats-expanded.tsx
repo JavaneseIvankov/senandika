@@ -1,69 +1,61 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getUserStats } from "@/actions/gamificationActions";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { getUserEarnedBadges } from "@/actions/gamificationActions";
 import { Badge } from "@/shared/components/ui/badge";
-import { Trophy, Zap, Target, Star, Calendar } from "lucide-react";
+import { Trophy, Zap, Target } from "lucide-react";
+
+interface GamificationStats {
+  userId: string;
+  xp: number;
+  level: number;
+  streakDays: number;
+  lastActiveDate: string | null;
+  progress: {
+    currentLevelXP: number;
+    nextLevelXP: number;
+    xpInCurrentLevel: number;
+    xpNeededForLevel: number;
+    progressPercentage: number;
+  };
+}
+
+interface UserBadge {
+  code: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  earnedAt?: string;
+}
 
 interface GamificationStatsExpandedProps {
-  userId?: string;
+  stats: GamificationStats;
 }
 
 export default function GamificationStatsExpanded({
-  userId,
+  stats,
 }: GamificationStatsExpandedProps) {
-  const [stats, setStats] = useState<{
-    level: number;
-    xp: number;
-    xpToNextLevel: number;
-    totalSessions: number;
-    totalMessages: number;
-    streak: number;
-    longestStreak: number;
-    badges: Array<{ code: string; name: string; description: string }>;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [badges, setBadges] = useState<UserBadge[]>([]);
+  const [loadingBadges, setLoadingBadges] = useState(true);
 
+  // Fetch badges separately since they're not in the main stats
   useEffect(() => {
-    async function loadStats() {
+    async function loadBadges() {
       try {
-        setLoading(true);
-        const data = await getUserStats();
-        setStats({
-          level: data.level,
-          xp: data.xp,
-          xpToNextLevel: data.xpToNextLevel,
-          totalSessions: data.totalSessions,
-          totalMessages: data.totalMessages,
-          streak: data.streak,
-          longestStreak: data.longestStreak,
-          badges: data.badges,
-        });
+        setLoadingBadges(true);
+        const earnedBadges = await getUserEarnedBadges();
+        setBadges(earnedBadges);
       } catch (error) {
-        console.error("Failed to load stats:", error);
+        console.error("Failed to load badges:", error);
       } finally {
-        setLoading(false);
+        setLoadingBadges(false);
       }
     }
 
-    loadStats();
-  }, [userId]);
+    loadBadges();
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return <p className="text-sm text-muted-foreground">No stats available</p>;
-  }
-
-  const xpPercentage = (stats.xp / stats.xpToNextLevel) * 100;
+  const xpPercentage = stats.progress.progressPercentage;
 
   return (
     <div className="space-y-4">
@@ -75,7 +67,7 @@ export default function GamificationStatsExpanded({
             <span className="text-lg font-semibold">Level {stats.level}</span>
           </div>
           <span className="text-sm text-muted-foreground">
-            {stats.xp} / {stats.xpToNextLevel} XP
+            {stats.progress.xpInCurrentLevel} / {stats.progress.xpNeededForLevel} XP
           </span>
         </div>
 
@@ -114,15 +106,15 @@ export default function GamificationStatsExpanded({
           <Zap className="h-4 w-4 text-orange-500 mt-0.5" />
           <div>
             <p className="text-xs text-orange-600/70">Current Streak</p>
-            <p className="text-lg font-semibold text-orange-700">{stats.streak} days</p>
+            <p className="text-lg font-semibold text-orange-700">{stats.streakDays} days</p>
           </div>
         </div>
 
         <div className="flex items-start gap-2 p-3 bg-linear-to-br from-yellow-50 to-amber-50 rounded-lg border border-yellow-100">
-          <Trophy className="h-4 w-4 text-yellow-500 mt-0.5" />
+          <Target className="h-4 w-4 text-primary mt-0.5" />
           <div>
-            <p className="text-xs text-yellow-600/70">Longest Streak</p>
-            <p className="text-lg font-semibold text-yellow-700">{stats.longestStreak} days</p>
+            <p className="text-xs text-yellow-600/70">Total XP</p>
+            <p className="text-lg font-semibold text-yellow-700">{stats.xp}</p>
           </div>
         </div>
       </div>
@@ -132,22 +124,24 @@ export default function GamificationStatsExpanded({
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="h-4 w-4 text-yellow-500" />
           <span className="text-sm font-semibold">
-            Badges ({stats.badges.length})
+            Badges {loadingBadges ? "" : `(${badges.length})`}
           </span>
         </div>
 
-        {stats.badges.length === 0 ? (
+        {loadingBadges ? (
+          <p className="text-sm text-muted-foreground">Loading badges...</p>
+        ) : badges.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No badges earned yet. Keep journaling!
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {stats.badges.map((badge) => (
+            {badges.map((badge) => (
               <Badge
                 key={badge.code}
                 variant="secondary"
                 className="cursor-pointer"
-                title={badge.description}
+                title={badge.description || undefined}
               >
                 {badge.name}
               </Badge>
