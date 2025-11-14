@@ -29,13 +29,13 @@ export interface UseGamificationStatsReturn {
 
 /**
  * Custom hook for managing gamification stats with real-time updates
- * 
+ *
  * Features:
  * - Fetches user's gamification stats on mount
  * - Automatically refetches when gamification events occur
  * - Provides loading and error states
  * - Manual refetch function
- * 
+ *
  * @returns Stats data, loading state, error, and refetch function
  */
 export function useGamificationStats(): UseGamificationStatsReturn {
@@ -52,7 +52,7 @@ export function useGamificationStats(): UseGamificationStatsReturn {
     } catch (err) {
       console.error("Failed to fetch gamification stats:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to load statistics"
+        err instanceof Error ? err.message : "Failed to load statistics",
       );
     } finally {
       setIsLoading(false);

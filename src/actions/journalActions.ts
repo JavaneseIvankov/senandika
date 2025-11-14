@@ -26,8 +26,7 @@ import {
   processSessionReward,
   getUserStats,
 } from "@/lib/services/gamificationService";
-import { generateObject } from "ai";
-import { gemini } from "@/lib/ai";
+import { resilientGenerateObject } from "@/lib/ai/resilientAI";
 import { z } from "zod";
 
 /**
@@ -126,9 +125,8 @@ export async function sendJournalMessage(sessionId: string, userText: string) {
   console.log("=== PAYLOAD DEBUG ===");
   console.log(payload);
 
-  // 7. [WHAT] Generate structured response with generateObject
-  const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.0-flash"),
+  // 7. [WHAT] Generate structured response with resilient AI (2.5 Flash → 2.0 Flash fallback)
+  const { object: coachResponse } = await resilientGenerateObject({
     schema: z.object({
       analysis: z.object({
         emotions: z
@@ -267,9 +265,8 @@ export async function getOpeningMessage(sessionId: string) {
   console.log("Session ID:", sessionId);
   console.log("Mood from session:", mood);
 
-  // 3. [WHAT] Generate opening message with AI
-  const { object: openingResponse } = await generateObject({
-    model: gemini("gemini-2.0-flash"),
+  // 3. [WHAT] Generate opening message with resilient AI (2.5 Flash → 2.0 Flash fallback)
+  const { object: openingResponse } = await resilientGenerateObject({
     schema: z.object({
       greeting: z
         .string()
@@ -568,9 +565,8 @@ export async function confirmEndSession(sessionId: string) {
     }),
   });
 
-  // Get AI's closing message
-  const { object: coachResponse } = await generateObject({
-    model: gemini("gemini-2.0-flash"),
+  // Get AI's closing message with resilient AI (2.5 Flash → 2.0 Flash fallback)
+  const { object: coachResponse } = await resilientGenerateObject({
     schema,
     system: CORE_SYSTEM_PROMPT,
     prompt: payload,

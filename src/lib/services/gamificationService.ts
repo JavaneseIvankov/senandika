@@ -171,8 +171,7 @@ export const BADGE_CHECKERS: Record<string, BadgeChecker> = {
 
   // === Special Badges ===
   breakthrough_moment: (ctx) =>
-    ctx.growth.stressTrend === "improving" &&
-    ctx.counts.completedSessions >= 5,
+    ctx.growth.stressTrend === "improving" && ctx.counts.completedSessions >= 5,
 };
 
 // ============================================================================
@@ -387,7 +386,9 @@ export async function awardXP(
     })
     .where(eq(gamificationStat.userId, userId));
 
-  console.log(`[GAMIFICATION] Awarded ${amount} XP to ${userId} for: ${reason}`);
+  console.log(
+    `[GAMIFICATION] Awarded ${amount} XP to ${userId} for: ${reason}`,
+  );
   if (leveledUp) {
     console.log(
       `[GAMIFICATION] Level up! ${userId}: ${oldLevel} → ${newLevel}`,
@@ -532,7 +533,9 @@ async function getEmotionalPatterns(userId: string) {
   return {
     uniqueEmotionsTracked: data ? Number.parseInt(data.unique_emotions) : 0,
     dominantEmotions: [],
-    highStressSessionsCompleted: data ? Number.parseInt(data.high_stress_count) : 0,
+    highStressSessionsCompleted: data
+      ? Number.parseInt(data.high_stress_count)
+      : 0,
     calmSessionsStreak: 0,
     totalTopicsExplored: data ? Number.parseInt(data.unique_topics) : 0,
     dominantTopics: [],
@@ -730,10 +733,7 @@ export async function awardBadge(
       .select()
       .from(userBadge)
       .where(
-        and(
-          eq(userBadge.userId, userId),
-          eq(userBadge.badgeId, badgeData.id),
-        ),
+        and(eq(userBadge.userId, userId), eq(userBadge.badgeId, badgeData.id)),
       )
       .then((rows) => rows[0]);
 
@@ -748,9 +748,7 @@ export async function awardBadge(
       earnedAt: new Date(),
     });
 
-    console.log(
-      `[GAMIFICATION] Badge awarded: ${badgeCode} to ${userId}`,
-    );
+    console.log(`[GAMIFICATION] Badge awarded: ${badgeCode} to ${userId}`);
     return true;
   } catch (error) {
     console.error(`[GAMIFICATION] Error awarding badge ${badgeCode}:`, error);
