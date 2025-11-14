@@ -624,7 +624,7 @@ ATURAN GAYA (PENTING):
 
   try {
     const { object: insights } = await generateObject({
-      model: gemini("gemini-2.5-flash"),
+      model: gemini("gemini-2.0-flash"),
       schema: insightsSchema,
       prompt,
     });

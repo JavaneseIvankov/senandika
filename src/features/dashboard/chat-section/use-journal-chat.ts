@@ -8,9 +8,14 @@ import {
   getActiveSessionWithMessages,
   confirmEndSession,
   startJournalSession,
+  getOpeningMessage,
 } from "@/actions/journalActions";
 import { checkAndAwardBadges } from "@/actions/gamificationActions";
 import { toast } from "sonner";
+import {
+  getUserFriendlyError,
+  logErrorDetails,
+} from "@/lib/utils/errorMessages";
 
 export interface UseJournalChatReturn {
   // State
@@ -79,7 +84,12 @@ export function useJournalChat(): UseJournalChatReturn {
           setMessages(data.messages as Message[]);
         }
       } catch (err) {
-        console.error("Failed to load active session:", err);
+        // Log internal error details for debugging
+        logErrorDetails(err, "loadActiveSession");
+
+        // Show user-friendly error message
+        const userFriendlyMessage = getUserFriendlyError(err);
+        setError(userFriendlyMessage);
       } finally {
         setIsLoadingSession(false);
       }
@@ -123,7 +133,9 @@ export function useJournalChat(): UseJournalChatReturn {
     async (text: string) => {
       if (!text.trim()) return;
       if (!session?.id) {
-        setError("No active session. Start a session first.");
+        setError(
+          "Tidak ada sesi aktif. Silakan mulai percakapan terlebih dahulu.",
+        );
         return;
       }
 
@@ -177,9 +189,12 @@ export function useJournalChat(): UseJournalChatReturn {
             }
           }
         } catch (err) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Failed to send message";
-          setError(errorMessage);
+          // Log internal error details for debugging
+          logErrorDetails(err, "sendMessage");
+
+          // Show user-friendly error message
+          const userFriendlyMessage = getUserFriendlyError(err);
+          setError(userFriendlyMessage);
 
           // Remove user message on error
           setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
@@ -201,10 +216,32 @@ export function useJournalChat(): UseJournalChatReturn {
       });
       setMessages([]);
       setError(null);
+
+      // Fetch and display opening message from AI
+      try {
+        const openingData = await getOpeningMessage(sessionData.id);
+
+        // Add opening message to chat
+        const openingMessage: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: openingData.fullMessage,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([openingMessage]);
+      } catch (openingErr) {
+        // Log but don't fail the session creation if opening message fails
+        logErrorDetails(openingErr, "getOpeningMessage");
+        console.error("Failed to get opening message:", openingErr);
+        // Session is still created successfully, just without opening message
+      }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to start session";
-      setError(errorMessage);
+      // Log internal error details for debugging
+      logErrorDetails(err, "startNewSession");
+
+      // Show user-friendly error message
+      const userFriendlyMessage = getUserFriendlyError(err);
+      setError(userFriendlyMessage);
     }
   }, []);
 
@@ -251,9 +288,12 @@ export function useJournalChat(): UseJournalChatReturn {
           }
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to end session";
-        setError(errorMessage);
+        // Log internal error details for debugging
+        logErrorDetails(err, "confirmEndSession");
+
+        // Show user-friendly error message
+        const userFriendlyMessage = getUserFriendlyError(err);
+        setError(userFriendlyMessage);
       }
     });
   }, [session]);
