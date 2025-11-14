@@ -129,7 +129,7 @@ export default function GamificationStatsExpanded({
 
       {/* Badges Section */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-3">
           <Trophy className="h-4 w-4 text-yellow-500" />
           <span className="text-sm font-semibold">
             Badges ({stats.badges.length})
@@ -146,7 +146,7 @@ export default function GamificationStatsExpanded({
               <Badge
                 key={badge.code}
                 variant="secondary"
-                className="cursor-help"
+                className="cursor-pointer"
                 title={badge.description}
               >
                 {badge.name}
