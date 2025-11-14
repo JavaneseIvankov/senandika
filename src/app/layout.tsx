@@ -37,7 +37,7 @@ export default function RootLayout({
         className={` ${figtree.className} ${spaceGrotesk.className} ${plusJakartaSans.variable} antialiased`}
       >
         {children}
-        <Toaster position="top-right" richColors />
+        <Toaster className="m-5" position="top-right" richColors />
       </body>
     </html>
   );

@@ -93,7 +93,7 @@ export default function ChatCard({
             <p className="text-muted-foreground text-center">
               No active session. Start a new one to begin chatting.
             </p>
-            <Button onClick={handleStartSession}>Start New Session</Button>
+            <Button className="cursor-pointer hover:bg-gray-800 hover:-translate-y-1 active:translate-0" onClick={handleStartSession}>Start New Session</Button>
           </div>
         )}
 

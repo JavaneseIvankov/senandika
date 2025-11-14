@@ -72,12 +72,12 @@ export default function GamificationStatsExpanded({
         </div>
 
         {/* XP Progress Bar */}
-        <div className="w-full bg-secondary rounded-full h-3">
+        <div className="w-full bg-purple-100 rounded-full h-3">
           <div
-            className="bg-primary h-3 rounded-full transition-all duration-300 flex items-center justify-end pr-2"
+            className="bg-linear-to-r from-purple-400 to-pink-400 h-3 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
             style={{ width: `${xpPercentage}%` }}
           >
-            <span className="text-xs text-primary-foreground font-medium">
+            <span className="text-xs text-white font-medium">
               {Math.round(xpPercentage)}%
             </span>
           </div>
@@ -86,19 +86,19 @@ export default function GamificationStatsExpanded({
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-100">
           <Zap className="h-4 w-4 text-orange-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Current Streak</p>
-            <p className="text-lg font-semibold">{stats.streakDays} days</p>
+            <p className="text-xs text-orange-600/70">Current Streak</p>
+            <p className="text-lg font-semibold text-orange-700">{stats.streakDays} days</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
-          <Target className="h-4 w-4 text-primary mt-0.5" />
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+          <Target className="h-4 w-4 text-purple-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Total XP</p>
-            <p className="text-lg font-semibold">{stats.xp}</p>
+            <p className="text-xs text-purple-600/70">Total XP</p>
+            <p className="text-lg font-semibold text-purple-700">{stats.xp}</p>
           </div>
         </div>
       </div>
