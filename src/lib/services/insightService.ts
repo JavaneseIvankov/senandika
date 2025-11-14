@@ -3,8 +3,7 @@ import "server-only";
 import { db } from "@/lib/db/db";
 import { insight } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { gemini } from "@/lib/ai";
-import { generateText } from "ai";
+import { resilientGenerateText } from "@/lib/ai/resilientAI";
 import { SUMMARY_SYSTEM_PROMPT, buildSummaryPrompt } from "./promptService";
 
 /**
@@ -46,9 +45,8 @@ export async function generateDailySummary(
       input.carryOverNotes,
     );
 
-    // 2. Call Gemini API to generate summary
-    const result = await generateText({
-      model: gemini("gemini-2.0-flash"),
+    // 2. Call resilient AI to generate summary (2.5 Flash → 2.0 Flash fallback)
+    const result = await resilientGenerateText({
       system: SUMMARY_SYSTEM_PROMPT,
       prompt: prompt,
     });

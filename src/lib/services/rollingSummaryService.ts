@@ -1,6 +1,5 @@
 import "server-only";
-import { generateText } from "ai";
-import { gemini } from "@/lib/ai";
+import { resilientGenerateText } from "@/lib/ai/resilientAI";
 
 /**
  * Rolling Summary Service for RAG System
@@ -108,9 +107,8 @@ export async function generateRollingSummary(
   console.log("Has carry-over notes:", !!carryOverNotes);
 
   try {
-    // Use Gemini 2.0 Flash for fast, cheap summarization
-    const { text } = await generateText({
-      model: gemini("gemini-2.0-flash"),
+    // Use resilient AI with automatic fallback (2.5 Flash → 2.0 Flash)
+    const { text } = await resilientGenerateText({
       system: SYSTEM_PROMPT,
       prompt: JSON.stringify(payload, null, 2),
       temperature: 0.3, // Low temperature for consistency

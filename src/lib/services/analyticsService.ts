@@ -17,8 +17,7 @@ import {
   badge,
 } from "@/lib/db/schema/schema";
 import { eq, and, between, desc } from "drizzle-orm";
-import { generateObject } from "ai";
-import { gemini } from "@/lib/ai";
+import { resilientGenerateObject } from "@/lib/ai/resilientAI";
 import { z } from "zod";
 
 // =====================================
@@ -623,8 +622,7 @@ ATURAN GAYA (PENTING):
   });
 
   try {
-    const { object: insights } = await generateObject({
-      model: gemini("gemini-2.0-flash"),
+    const { object: insights } = await resilientGenerateObject({
       schema: insightsSchema,
       prompt,
     });
