@@ -19,7 +19,7 @@ export default function ChatCard({
   onSessionStart,
   onSessionEnd,
 }: ChatCardProps) {
-  const [showMoodModal, setShowMoodModal] = useState(true);
+  const [showMoodModal, setShowMoodModal] = useState(false);
 
   const {
     messages,
