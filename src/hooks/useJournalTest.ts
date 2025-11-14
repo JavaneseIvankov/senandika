@@ -4,6 +4,7 @@ import {
   startJournalSession,
   endJournalSession,
   sendJournalMessage,
+  getOpeningMessage,
 } from "@/actions/journalActions";
 import {
   getUserGamificationStats,
@@ -114,6 +115,47 @@ export function useJournalTest() {
     }
   }, [addDebugLog]);
 
+  // Get opening message
+  const handleGetOpeningMessage = useCallback(async () => {
+    if (!session?.id) {
+      addDebugLog("warning", "No active session. Start a session first.");
+      setError("No active session. Start a session first.");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        addDebugLog("info", "Generating opening message from session mood...");
+
+        const openingData = await getOpeningMessage(session.id);
+
+        addDebugLog("success", "Opening message generated", {
+          greeting: openingData.greeting,
+          promptSuggestion: openingData.promptSuggestion,
+        });
+
+        // Add opening message as system message
+        const openingMsg: Message = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: openingData.fullMessage,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, openingMsg]);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to generate opening message";
+        setError(errorMessage);
+        addDebugLog("error", errorMessage, {
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+        });
+      }
+    });
+  }, [session, addDebugLog]);
+
   // Start a new session
   const handleStartSession = useCallback(async () => {
     startTransition(async () => {
@@ -178,7 +220,10 @@ export function useJournalTest() {
           });
 
           if (reward.leveledUp) {
-            addDebugLog("success", `🎉 LEVEL UP! You're now level ${reward.level}!`);
+            addDebugLog(
+              "success",
+              `🎉 LEVEL UP! You're now level ${reward.level}!`,
+            );
           }
 
           if (reward.badgesEarned && reward.badgesEarned.length > 0) {
@@ -274,7 +319,10 @@ export function useJournalTest() {
 
               // Show level up notification
               if (reward.leveledUp) {
-                addDebugLog("success", `🎉 LEVEL UP! You're now level ${reward.level}!`);
+                addDebugLog(
+                  "success",
+                  `🎉 LEVEL UP! You're now level ${reward.level}!`,
+                );
               }
 
               // Show new badges
@@ -340,6 +388,7 @@ export function useJournalTest() {
     // Actions
     setInput,
     sendMessage: handleSendMessage,
+    getOpeningMessage: handleGetOpeningMessage,
     startSession: handleStartSession,
     endSession: handleEndSession,
     clearMessages,

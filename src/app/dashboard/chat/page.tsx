@@ -2,8 +2,8 @@ import ChatContainer from "@/features/dashboard/chat-section/container/chat-cont
 
 export default function Home() {
   return (
-    <main className="flex flex-col min-h-screen overscroll-y-contain ">
+    <div className="flex w-full justify-center items-center">
       <ChatContainer />
-    </main>
+    </div>
   );
 }

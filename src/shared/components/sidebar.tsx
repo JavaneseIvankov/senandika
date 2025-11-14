@@ -15,6 +15,8 @@ import {
   SidebarMenuButton,
 } from "./ui/sidebar"
 import Link from "next/link"
+import Image from "next/image"
+import Image from "next/image"
 import { Home, Settings } from "lucide-react"
 
 export default function DashboardSidebar() {
@@ -22,7 +24,13 @@ export default function DashboardSidebar() {
       <Sidebar> 
         {/* Bagian sidebar-nya */}
         <SidebarHeader className="flex flex-row items-center">
-          <div className="w-8 h-8 bg-yellow-400 rounded-full"></div>
+          <Image
+            src="/assets/logo/logo-without-text.png"
+            alt="Senandika Logo"
+            width={50}
+            height={50}
+            className="w-12 h-12 scale-100 rounded-full object-contain"
+          />
           <h1 className="text-lg font-bold px-2">Senandika</h1>
         </SidebarHeader>
 

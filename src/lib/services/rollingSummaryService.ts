@@ -110,7 +110,7 @@ export async function generateRollingSummary(
   try {
     // Use Gemini 2.0 Flash for fast, cheap summarization
     const { text } = await generateText({
-      model: gemini("gemini-2.0-flash"),
+      model: gemini("gemini-2.5-flash"),
       system: SYSTEM_PROMPT,
       prompt: JSON.stringify(payload, null, 2),
       temperature: 0.3, // Low temperature for consistency
