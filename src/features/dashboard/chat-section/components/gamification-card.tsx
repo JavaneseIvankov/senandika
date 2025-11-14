@@ -30,7 +30,7 @@ export default function GamificationCard() {
               </CardHeader>
               
               <CardContent>
-                <p className='text-[26px] text-purple-600'>{level.level}</p>
+                <p className='text-[26px] text-purple-600 font-bold'>{level.level}</p>
                 <p className='text-gray-600'>{level.xp}</p>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -49,7 +49,7 @@ export default function GamificationCard() {
               </CardHeader>
               
               <CardContent>
-                <p className='text-[26px] text-blue-600'>{xp.XP}</p>
+                <p className='text-[26px] text-blue-600 font-bold'>{xp.XP}</p>
                 <p className='text-gray-600'>{xp.nextLevel}</p>
               </CardContent>
             </Card>
@@ -60,7 +60,7 @@ export default function GamificationCard() {
               </CardHeader>
 
               <CardContent>
-                <p className='text-[26px] text-orange-600'>🔥 {streak.streak}</p>
+                <p className='text-[26px] text-orange-600 font-bold'>🔥 {streak.streak}</p>
                 <p className='text-gray-600'>{streak.row}</p>
               </CardContent>
             </Card>
@@ -71,7 +71,7 @@ export default function GamificationCard() {
               </CardHeader>
               
               <CardContent>
-                <p className='text-[26px] text-yellow-800'>🏆 {badge.badge}</p>
+                <p className='text-[26px] text-yellow-800 font-bold'>🏆 {badge.badge}</p>
                 <p className='text-gray-600'>{badge.desc}</p>
               </CardContent>
             </Card>
@@ -83,10 +83,10 @@ export default function GamificationCard() {
                 <CardTitle className='text-green-700'>✨ {reward.title}</CardTitle>
               </CardHeader>
               <CardContent className='flex justify-between w-[80%] text-gray-600'>
-                <p>Xp Gained: <span className='text-green-800'>{reward.XPGained}</span></p>
-                <p>Level: <span>{reward.level}</span></p>
-                <p>Streak: <span>{reward.streak}</span></p>
-                <p>New Badges: <span className='text-yellow-800'>{reward.newBadges}</span></p>
+                <p>Xp Gained: <span className='text-green-800 font-bold'>{reward.XPGained}</span></p>
+                <p>Level: <span className='font-bold'>{reward.level}</span></p>
+                <p>Streak: <span className='font-bold'>{reward.streak}</span></p>
+                <p>New Badges: <span className='text-yellow-800 font-bold'>{reward.newBadges}</span></p>
               </CardContent>
             </Card>
           </div>
