@@ -16,7 +16,6 @@ import {
 } from "./ui/sidebar"
 import Link from "next/link"
 import Image from "next/image"
-import Image from "next/image"
 import { Home, Settings } from "lucide-react"
 
 export default function DashboardSidebar() {
