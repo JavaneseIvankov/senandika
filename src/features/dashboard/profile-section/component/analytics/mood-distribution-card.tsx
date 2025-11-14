@@ -9,23 +9,23 @@ interface MoodDistributionCardProps {
 
 export function MoodDistributionCard({ distribution }: MoodDistributionCardProps) {
   const chartData = [
-    { name: "Improved", value: distribution.improved, color: "hsl(var(--chart-1))" },
-    { name: "Worsened", value: distribution.worsened, color: "hsl(var(--chart-2))" },
-    { name: "Unchanged", value: distribution.unchanged, color: "hsl(var(--chart-3))" },
+    { name: "Improved", value: distribution.improved, color: "#86efac" }, // soft green
+    { name: "Worsened", value: distribution.worsened, color: "#fca5a5" }, // soft red
+    { name: "Unchanged", value: distribution.unchanged, color: "#cbd5e1" }, // soft gray
   ];
 
   const chartConfig = {
     improved: {
       label: "Improved",
-      color: "hsl(var(--chart-1))",
+      color: "#86efac",
     },
     worsened: {
       label: "Worsened",
-      color: "hsl(var(--chart-2))",
+      color: "#fca5a5",
     },
     unchanged: {
       label: "Unchanged",
-      color: "hsl(var(--chart-3))",
+      color: "#cbd5e1",
     },
   };
 
@@ -45,9 +45,11 @@ export function MoodDistributionCard({ distribution }: MoodDistributionCardProps
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
+                outerRadius={90}
+                innerRadius={50}
                 fill="#8884d8"
                 dataKey="value"
+                paddingAngle={2}
               >
                 {chartData.map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />

@@ -5,11 +5,13 @@ import { ProfileHeader } from './profile/profile-header';
 import { UserInfoCard } from './profile/user-info-card';
 import { ProfileSkeleton } from './profile/profile-skeleton';
 import { useUserProfile } from '@/hooks/use-user-profile';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 export default function ProfileCard() {
-  const { user, isLoading } = useUserProfile();
+  const { user, isLoading: isLoadingUser } = useUserProfile();
+  const { analytics, isLoading: isLoadingAnalytics } = useAnalytics(7);
 
-  if (isLoading) {
+  if (isLoadingUser) {
     return <ProfileSkeleton />;
   }
 
@@ -21,7 +23,8 @@ export default function ProfileCard() {
           <UserInfoCard 
             name={user?.name} 
             email={user?.email} 
-            image={user?.image} 
+            image={user?.image ?? undefined}
+            badges={isLoadingAnalytics ? [] : analytics?.gamificationSummary.recentBadges}
           />
         </CardContent>
       </Card>

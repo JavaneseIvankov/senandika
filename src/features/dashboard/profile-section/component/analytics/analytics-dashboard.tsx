@@ -53,12 +53,12 @@ export function AnalyticsDashboard({
   return (
     <div className="space-y-6">
       {/* Time Range Selector */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Analytics Overview</h2>
+      <div className="flex items-center justify-between p-4 rounded-lg bg-linear-to-r from-indigo-50/50 to-purple-50/50 border border-indigo-100">
+        <h2 className="text-2xl font-bold text-indigo-900">Analytics Overview</h2>
         <TimeRangeSelector selected={timeRange} onChange={onTimeRangeChange} />
       </div>
 
-      <Separator />
+      <Separator className="bg-indigo-100" />
 
       {/* Session Stats */}
       <SessionStatsGrid stats={analytics.sessionStats} />

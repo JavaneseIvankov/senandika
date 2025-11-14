@@ -19,7 +19,7 @@ export function MoodChart({ moodTrends, days }: MoodChartProps) {
   const chartConfig = {
     stress: {
       label: "Stress Score",
-      color: "hsl(var(--chart-1))",
+      color: "#a78bfa", // soft purple
     },
   };
 
@@ -76,26 +76,36 @@ export function MoodChart({ moodTrends, days }: MoodChartProps) {
         <ChartContainer config={chartConfig} className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <defs>
+                <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#a78bfa" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#a78bfa" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
               <XAxis
                 dataKey="day"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
+                stroke="#94a3b8"
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
                 domain={[0, 100]}
+                stroke="#94a3b8"
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Line
                 type="monotone"
                 dataKey="stress"
-                stroke="var(--color-stress)"
-                strokeWidth={2}
-                dot={{ fill: "var(--color-stress)" }}
+                stroke="#a78bfa"
+                strokeWidth={3}
+                dot={{ fill: "#a78bfa", strokeWidth: 2, r: 4, stroke: "#ffffff" }}
+                activeDot={{ r: 6, fill: "#8b5cf6" }}
+                fill="url(#stressGradient)"
               />
             </LineChart>
           </ResponsiveContainer>

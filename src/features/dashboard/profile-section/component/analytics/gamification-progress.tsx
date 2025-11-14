@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Progress } from "@/shared/components/ui/progress";
 import { Badge } from "@/shared/components/ui/badge";
 import { Trophy, Zap, Flame } from "lucide-react";
 import type { SerializedAnalytics } from "@/actions/analyticsActions";
@@ -14,10 +13,10 @@ export function GamificationProgress({ summary }: GamificationProgressProps) {
   const progressPercentage = (currentLevelXP / xpToNextLevel) * 100;
 
   return (
-    <Card>
+    <Card className="border-purple-100 bg-linear-to-br from-purple-50/50 to-pink-50/50">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-500" />
+          <Trophy className="h-5 w-5 text-yellow-400" />
           Gamification Progress
         </CardTitle>
       </CardHeader>
@@ -26,12 +25,17 @@ export function GamificationProgress({ summary }: GamificationProgressProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Level {summary.currentLevel}</span>
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-200">
               <Zap className="h-3 w-3 mr-1" />
               {summary.totalXP} XP
             </Badge>
           </div>
-          <Progress value={progressPercentage} className="h-3" />
+          <div className="relative h-3 w-full overflow-hidden rounded-full bg-purple-100">
+            <div 
+              className="h-full transition-all duration-500 ease-out rounded-full bg-linear-to-r from-purple-400 to-pink-400"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
           <p className="text-xs text-muted-foreground">
             {xpToNextLevel - currentLevelXP} XP to level {summary.currentLevel + 1}
           </p>
@@ -39,27 +43,27 @@ export function GamificationProgress({ summary }: GamificationProgressProps) {
 
         {/* Streaks */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
+          <div className="space-y-1 p-3 rounded-lg bg-orange-50 border border-orange-100">
             <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-orange-500" />
-              <span className="text-sm font-medium">Current Streak</span>
+              <Flame className="h-4 w-4 text-orange-400" />
+              <span className="text-sm font-medium text-orange-900">Current Streak</span>
             </div>
-            <p className="text-2xl font-bold">{summary.currentStreak} days</p>
+            <p className="text-2xl font-bold text-orange-600">{summary.currentStreak} days</p>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 p-3 rounded-lg bg-yellow-50 border border-yellow-100">
             <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">Longest Streak</span>
+              <Trophy className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm font-medium text-yellow-900">Longest Streak</span>
             </div>
-            <p className="text-2xl font-bold">{summary.longestStreak} days</p>
+            <p className="text-2xl font-bold text-yellow-600">{summary.longestStreak} days</p>
           </div>
         </div>
 
         {/* Badges Count */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-purple-100">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Total Badges</span>
-            <Badge variant="outline" className="text-lg">
+            <Badge variant="outline" className="text-lg border-purple-200 text-purple-700">
               {summary.totalBadges}
             </Badge>
           </div>

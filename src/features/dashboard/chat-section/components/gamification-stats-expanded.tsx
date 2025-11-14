@@ -80,12 +80,12 @@ export default function GamificationStatsExpanded({
         </div>
 
         {/* XP Progress Bar */}
-        <div className="w-full bg-secondary rounded-full h-3">
+        <div className="w-full bg-purple-100 rounded-full h-3">
           <div
-            className="bg-primary h-3 rounded-full transition-all duration-300 flex items-center justify-end pr-2"
+            className="bg-linear-to-r from-purple-400 to-pink-400 h-3 rounded-full transition-all duration-500 ease-out flex items-center justify-end pr-2"
             style={{ width: `${xpPercentage}%` }}
           >
-            <span className="text-xs text-primary-foreground font-medium">
+            <span className="text-xs text-white font-medium">
               {Math.round(xpPercentage)}%
             </span>
           </div>
@@ -94,35 +94,35 @@ export default function GamificationStatsExpanded({
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
           <Calendar className="h-4 w-4 text-blue-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Total Sessions</p>
-            <p className="text-lg font-semibold">{stats.totalSessions}</p>
+            <p className="text-xs text-blue-600/70">Total Sessions</p>
+            <p className="text-lg font-semibold text-blue-700">{stats.totalSessions}</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
           <Star className="h-4 w-4 text-purple-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Messages</p>
-            <p className="text-lg font-semibold">{stats.totalMessages}</p>
+            <p className="text-xs text-purple-600/70">Messages</p>
+            <p className="text-lg font-semibold text-purple-700">{stats.totalMessages}</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-100">
           <Zap className="h-4 w-4 text-orange-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Current Streak</p>
-            <p className="text-lg font-semibold">{stats.streak} days</p>
+            <p className="text-xs text-orange-600/70">Current Streak</p>
+            <p className="text-lg font-semibold text-orange-700">{stats.streak} days</p>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-start gap-2 p-3 bg-linear-to-br from-yellow-50 to-amber-50 rounded-lg border border-yellow-100">
           <Trophy className="h-4 w-4 text-yellow-500 mt-0.5" />
           <div>
-            <p className="text-xs text-muted-foreground">Longest Streak</p>
-            <p className="text-lg font-semibold">{stats.longestStreak} days</p>
+            <p className="text-xs text-yellow-600/70">Longest Streak</p>
+            <p className="text-lg font-semibold text-yellow-700">{stats.longestStreak} days</p>
           </div>
         </div>
       </div>

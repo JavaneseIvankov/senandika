@@ -49,7 +49,12 @@ export default function Navbar() {
         <NavigationMenuList className="flex w-full justify-between">
 
             <NavigationMenuItem className="flex-1 w-full">
-              <NavigationMenuLink className="text-[18px] cursor-pointer hover:scale-110 transition-transform duration-300" href="/login">Login</NavigationMenuLink>
+              <NavigationMenuLink 
+                className="text-[18px] cursor-pointer bg-linear-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full hover:from-purple-600 hover:to-pink-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 inline-block" 
+                href="/login"
+              >
+                Login
+              </NavigationMenuLink>
             </NavigationMenuItem>
 
         </NavigationMenuList>
