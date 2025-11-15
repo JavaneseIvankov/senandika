@@ -26,6 +26,7 @@ import {
   processSessionReward,
   getUserStats,
 } from "@/lib/services/gamificationService";
+import { invalidateAnalyticsCache } from "@/lib/services/analyticsService";
 import { resilientGenerateObject } from "@/lib/ai/resilientAI";
 import { z } from "zod";
 
@@ -582,6 +583,9 @@ export async function confirmEndSession(sessionId: string) {
 
   // End the session
   const result = await endJournalSession(sessionId, "normal");
+
+  // Invalidate analytics cache since session data changed
+  await invalidateAnalyticsCache(user.id);
 
   return {
     message: {

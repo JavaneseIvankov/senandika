@@ -5,10 +5,10 @@ import type { z } from "zod";
 
 /**
  * Resilient AI Provider
- * 
+ *
  * Problem: Gemini 2.5 Flash is faster and better, but prone to 503 overload errors
  * Solution: Try 2.5 Flash first, automatically fallback to 2.0 Flash on overload
- * 
+ *
  * Features:
  * - Automatic fallback on 503 errors
  * - Centralized model configuration
@@ -27,7 +27,7 @@ const FALLBACK_MODEL = "gemini-2.0-flash";
 const OVERLOAD_ERROR_CODES = [503, 429]; // 503 = Service Unavailable, 429 = Too Many Requests
 const OVERLOAD_ERROR_MESSAGES = [
   "overload",
-  "overloaded", 
+  "overloaded",
   "quota",
   "rate limit",
   "too many requests",
@@ -38,17 +38,21 @@ const OVERLOAD_ERROR_MESSAGES = [
  */
 function isOverloadError(error: unknown): boolean {
   if (!error) return false;
-  
+
   const errorObj = error as Record<string, unknown>;
-  
+
   // Check status code
-  if (typeof errorObj.status === "number" && OVERLOAD_ERROR_CODES.includes(errorObj.status)) {
+  if (
+    typeof errorObj.status === "number" &&
+    OVERLOAD_ERROR_CODES.includes(errorObj.status)
+  ) {
     return true;
   }
-  
+
   // Check error message
-  const errorMessage = typeof errorObj.message === "string" ? errorObj.message.toLowerCase() : "";
-  return OVERLOAD_ERROR_MESSAGES.some(msg => errorMessage.includes(msg));
+  const errorMessage =
+    typeof errorObj.message === "string" ? errorObj.message.toLowerCase() : "";
+  return OVERLOAD_ERROR_MESSAGES.some((msg) => errorMessage.includes(msg));
 }
 
 // =====================================
@@ -63,34 +67,35 @@ export interface ResilientGenerateTextOptions {
 
 /**
  * Generate text with automatic fallback from 2.5 Flash to 2.0 Flash
- * 
+ *
  * @param options - Generation options
  * @returns GenerateTextResult
  */
 export async function resilientGenerateText(
-  options: ResilientGenerateTextOptions
+  options: ResilientGenerateTextOptions,
 ) {
   const { system, prompt, temperature = 0.7 } = options;
-  
+
   try {
     console.log(`🤖 Attempting with ${PRIMARY_MODEL}`);
-    
+
     const result = await generateText({
       model: gemini(PRIMARY_MODEL),
       system,
       prompt,
       temperature,
     });
-    
+
     console.log(`✅ Success with ${PRIMARY_MODEL}`);
     return result;
-    
   } catch (error) {
     // Check if it's an overload error
     if (isOverloadError(error)) {
-      console.warn(`⚠️ ${PRIMARY_MODEL} overloaded, falling back to ${FALLBACK_MODEL}`);
+      console.warn(
+        `⚠️ ${PRIMARY_MODEL} overloaded, falling back to ${FALLBACK_MODEL}`,
+      );
       console.warn("Error details:", error);
-      
+
       try {
         const result = await generateText({
           model: gemini(FALLBACK_MODEL),
@@ -98,16 +103,15 @@ export async function resilientGenerateText(
           prompt,
           temperature,
         });
-        
+
         console.log(`✅ Success with ${FALLBACK_MODEL} (fallback)`);
         return result;
-        
       } catch (fallbackError) {
         console.error(`❌ ${FALLBACK_MODEL} also failed:`, fallbackError);
         throw fallbackError;
       }
     }
-    
+
     // If it's not an overload error, throw immediately
     console.error(`❌ ${PRIMARY_MODEL} failed with non-overload error:`, error);
     throw error;
@@ -127,18 +131,18 @@ export interface ResilientGenerateObjectOptions<SCHEMA extends z.ZodTypeAny> {
 
 /**
  * Generate structured object with automatic fallback from 2.5 Flash to 2.0 Flash
- * 
+ *
  * @param options - Generation options with Zod schema
  * @returns GenerateObjectResult with typed object
  */
 export async function resilientGenerateObject<SCHEMA extends z.ZodTypeAny>(
-  options: ResilientGenerateObjectOptions<SCHEMA>
+  options: ResilientGenerateObjectOptions<SCHEMA>,
 ) {
   const { schema, system, prompt, temperature = 0.7 } = options;
-  
+
   try {
     console.log(`🤖 Attempting generateObject with ${PRIMARY_MODEL}`);
-    
+
     const result = await generateObject({
       model: gemini(PRIMARY_MODEL),
       schema,
@@ -146,16 +150,17 @@ export async function resilientGenerateObject<SCHEMA extends z.ZodTypeAny>(
       prompt,
       temperature,
     });
-    
+
     console.log(`✅ Success with ${PRIMARY_MODEL}`);
     return result;
-    
   } catch (error) {
     // Check if it's an overload error
     if (isOverloadError(error)) {
-      console.warn(`⚠️ ${PRIMARY_MODEL} overloaded, falling back to ${FALLBACK_MODEL}`);
+      console.warn(
+        `⚠️ ${PRIMARY_MODEL} overloaded, falling back to ${FALLBACK_MODEL}`,
+      );
       console.warn("Error details:", error);
-      
+
       try {
         const result = await generateObject({
           model: gemini(FALLBACK_MODEL),
@@ -164,16 +169,15 @@ export async function resilientGenerateObject<SCHEMA extends z.ZodTypeAny>(
           prompt,
           temperature,
         });
-        
+
         console.log(`✅ Success with ${FALLBACK_MODEL} (fallback)`);
         return result;
-        
       } catch (fallbackError) {
         console.error(`❌ ${FALLBACK_MODEL} also failed:`, fallbackError);
         throw fallbackError;
       }
     }
-    
+
     // If it's not an overload error, throw immediately
     console.error(`❌ ${PRIMARY_MODEL} failed with non-overload error:`, error);
     throw error;
@@ -237,18 +241,18 @@ export function getModelConfig() {
  * Can be used for health checks
  */
 export async function testModelAvailability(
-  modelName: "gemini-2.5-flash" | "gemini-2.0-flash" = "gemini-2.5-flash"
+  modelName: "gemini-2.5-flash" | "gemini-2.0-flash" = "gemini-2.5-flash",
 ): Promise<{ available: boolean; latency?: number; error?: string }> {
   const startTime = Date.now();
-  
+
   try {
     await generateText({
       model: gemini(modelName),
       prompt: "Test",
     });
-    
+
     const latency = Date.now() - startTime;
-    
+
     return {
       available: true,
       latency,

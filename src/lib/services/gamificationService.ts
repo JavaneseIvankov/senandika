@@ -749,6 +749,11 @@ export async function awardBadge(
     });
 
     console.log(`[GAMIFICATION] Badge awarded: ${badgeCode} to ${userId}`);
+    
+    // Invalidate analytics cache since badge data changed
+    const { invalidateAnalyticsCache } = await import("@/lib/services/analyticsService");
+    await invalidateAnalyticsCache(userId);
+    
     return true;
   } catch (error) {
     console.error(`[GAMIFICATION] Error awarding badge ${badgeCode}:`, error);
