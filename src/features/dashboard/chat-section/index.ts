@@ -1,5 +1,6 @@
+
 // Main component
-export { ChatCard } from "./components/chat-card";
+export * as ChatCard from "./components/chat-card";
 
 // Hook
 export { useJournalChat } from "./use-journal-chat";
