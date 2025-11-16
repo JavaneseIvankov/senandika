@@ -16,9 +16,12 @@ import {
 } from "./ui/sidebar"
 import Link from "next/link"
 import Image from "next/image"
-import { Home, Settings } from "lucide-react"
+import { CircleUserRound, MessageCircleMore } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function DashboardSidebar() {
+  const pathname = usePathname()
+  
   return (
       <Sidebar> 
         {/* Bagian sidebar-nya */}
@@ -39,16 +42,22 @@ export default function DashboardSidebar() {
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton 
+                asChild 
+                isActive={pathname === "/dashboard/profile"}
+              >
                 <Link href="/dashboard/profile" className="flex items-center">
-                  <Home className="mr-2" /> Profile
+                  <CircleUserRound className="mr-2" /> Profile
                 </Link>
               </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton 
+                asChild 
+                isActive={pathname === "/dashboard/chat"}
+              >
                 <Link href="/dashboard/chat" className="flex items-center">
-                  <Settings className="mr-2" /> Chat
+                  <MessageCircleMore className="mr-2" /> Chat
                 </Link>
               </SidebarMenuButton>
               </SidebarMenuItem>

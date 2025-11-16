@@ -346,14 +346,23 @@ export function useJournalChat(): UseJournalChatReturn {
 
           // Emit gamification events for real-time updates
           if (data.gamification.xpGained) {
-            emitXPGained(data.gamification.xpGained, data.gamification.totalXP || 0);
+            emitXPGained(
+              data.gamification.xpGained,
+              data.gamification.totalXP || 0,
+            );
           }
 
           if (data.gamification.leveledUp) {
-            emitLevelUp(data.gamification.level || 1, data.gamification.totalXP || 0);
+            emitLevelUp(
+              data.gamification.level || 1,
+              data.gamification.totalXP || 0,
+            );
           }
 
-          if (data.gamification.badgesEarned && data.gamification.badgesEarned.length > 0) {
+          if (
+            data.gamification.badgesEarned &&
+            data.gamification.badgesEarned.length > 0
+          ) {
             for (const badgeCode of data.gamification.badgesEarned) {
               emitBadgeEarned(badgeCode);
             }

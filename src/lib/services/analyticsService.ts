@@ -15,10 +15,10 @@ import {
   gamificationStat,
   userBadge,
   badge,
+  analyticsCache,
 } from "@/lib/db/schema/schema";
-import { eq, and, between, desc } from "drizzle-orm";
-import { generateObject } from "ai";
-import { gemini } from "@/lib/ai";
+import { eq, and, between, desc, lt } from "drizzle-orm";
+import { resilientGenerateObject } from "@/lib/ai/resilientAI";
 import { z } from "zod";
 
 // =====================================
@@ -623,8 +623,7 @@ ATURAN GAYA (PENTING):
   });
 
   try {
-    const { object: insights } = await generateObject({
-      model: gemini("gemini-2.0-flash"),
+    const { object: insights } = await resilientGenerateObject({
       schema: insightsSchema,
       prompt,
     });
@@ -662,11 +661,180 @@ ATURAN GAYA (PENTING):
 }
 
 // =====================================
+// 💾 Analytics Cache Management
+// =====================================
+
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+
+/**
+ * Get cached analytics if valid, otherwise return null
+ */
+async function getCachedAnalytics(
+  userId: string,
+  days: 7 | 30 | 90,
+): Promise<UserAnalytics | null> {
+  try {
+    const cached = await db
+      .select()
+      .from(analyticsCache)
+      .where(
+        and(
+          eq(analyticsCache.userId, userId),
+          eq(analyticsCache.timeRangeDays, days),
+        ),
+      )
+      .limit(1);
+
+    if (cached.length === 0) {
+      console.log("📊 No cache found");
+      return null;
+    }
+
+    const cacheEntry = cached[0];
+    const now = new Date();
+
+    // Check if cache is expired
+    if (now > cacheEntry.expiresAt) {
+      console.log("📊 Cache expired, deleting...");
+      await db
+        .delete(analyticsCache)
+        .where(eq(analyticsCache.id, cacheEntry.id));
+      return null;
+    }
+
+    console.log("✅ Cache hit! Using cached analytics");
+    console.log("📅 Cache created at:", cacheEntry.createdAt.toISOString());
+    console.log("⏰ Cache expires at:", cacheEntry.expiresAt.toISOString());
+
+    // Parse and reconstruct dates from cached data
+    const data = cacheEntry.data as Record<string, unknown>;
+    const timeRange = data.timeRange as Record<string, unknown>;
+    const gamificationSummary = data.gamificationSummary as Record<
+      string,
+      unknown
+    >;
+    const recentBadges = gamificationSummary.recentBadges as Array<
+      Record<string, unknown>
+    >;
+
+    return {
+      ...data,
+      timeRange: {
+        ...timeRange,
+        start: new Date(timeRange.start as string),
+        end: new Date(timeRange.end as string),
+        days: timeRange.days as number,
+      },
+      gamificationSummary: {
+        ...gamificationSummary,
+        recentBadges: recentBadges.map((badge) => ({
+          ...badge,
+          earnedAt: new Date(badge.earnedAt as string),
+        })),
+      },
+    } as UserAnalytics;
+  } catch (error) {
+    console.error("❌ Error reading cache:", error);
+    return null;
+  }
+}
+
+/**
+ * Save analytics to cache
+ */
+async function setCachedAnalytics(
+  userId: string,
+  days: 7 | 30 | 90,
+  analytics: UserAnalytics,
+): Promise<void> {
+  try {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + CACHE_TTL_MS);
+
+    // Delete old cache for this user+days combination
+    await db
+      .delete(analyticsCache)
+      .where(
+        and(
+          eq(analyticsCache.userId, userId),
+          eq(analyticsCache.timeRangeDays, days),
+        ),
+      );
+
+    // Insert new cache (cast to unknown first to avoid type issues with jsonb)
+    await db.insert(analyticsCache).values({
+      userId,
+      timeRangeDays: days,
+      data: analytics as unknown as Record<string, unknown>,
+      expiresAt,
+    });
+
+    console.log("💾 Analytics cached successfully");
+    console.log("⏰ Cache expires at:", expiresAt.toISOString());
+  } catch (error) {
+    console.error("❌ Error saving cache:", error);
+    // Don't throw - caching failure shouldn't break analytics
+  }
+}
+
+/**
+ * Invalidate (delete) cached analytics for a user
+ * Call this when user data changes (e.g., completes session, earns badge)
+ *
+ * @param userId - User ID
+ * @param days - Optional specific time range to invalidate (7, 30, or 90)
+ *               If not provided, invalidates all time ranges
+ */
+export async function invalidateAnalyticsCache(
+  userId: string,
+  days?: 7 | 30 | 90,
+): Promise<void> {
+  try {
+    if (days) {
+      // Invalidate specific time range
+      await db
+        .delete(analyticsCache)
+        .where(
+          and(
+            eq(analyticsCache.userId, userId),
+            eq(analyticsCache.timeRangeDays, days),
+          ),
+        );
+      console.log(`🗑️ Invalidated ${days}-day analytics cache for user ${userId}`);
+    } else {
+      // Invalidate all time ranges for this user
+      await db
+        .delete(analyticsCache)
+        .where(eq(analyticsCache.userId, userId));
+      console.log(`🗑️ Invalidated all analytics cache for user ${userId}`);
+    }
+  } catch (error) {
+    console.error("❌ Error invalidating cache:", error);
+    // Don't throw - cache invalidation failure shouldn't break the app
+  }
+}
+
+/**
+ * Clean up expired cache entries (can be called periodically)
+ */
+export async function cleanupExpiredCache(): Promise<void> {
+  try {
+    const now = new Date();
+    await db.delete(analyticsCache).where(lt(analyticsCache.expiresAt, now));
+
+    console.log("🧹 Cleaned up expired cache entries");
+  } catch (error) {
+    console.error("❌ Error cleaning up cache:", error);
+  }
+}
+
+// =====================================
 // 🎯 Main Analytics Function
 // =====================================
 
 /**
  * Get complete user analytics for a specified time period
+ * Uses cache with 1-day TTL to avoid expensive recalculations
  */
 export async function getUserAnalytics(
   userId: string,
@@ -675,6 +843,15 @@ export async function getUserAnalytics(
   console.log("\n=== GETTING USER ANALYTICS ===");
   console.log("User ID:", userId);
   console.log("Time range:", days, "days");
+
+  // 1. Try to get from cache first
+  const cachedAnalytics = await getCachedAnalytics(userId, days);
+  if (cachedAnalytics) {
+    return cachedAnalytics;
+  }
+
+  // 2. Cache miss - calculate fresh analytics
+  console.log("📊 Cache miss - calculating fresh analytics...");
 
   // Calculate date range
   const endDate = new Date();
@@ -700,9 +877,7 @@ export async function getUserAnalytics(
     days,
   );
 
-  console.log("=== ANALYTICS COMPLETE ===\n");
-
-  return {
+  const analytics: UserAnalytics = {
     timeRange: {
       start: startDate,
       end: endDate,
@@ -713,4 +888,11 @@ export async function getUserAnalytics(
     gamificationSummary,
     summaryInsights,
   };
+
+  // 3. Save to cache for next time
+  await setCachedAnalytics(userId, days, analytics);
+
+  console.log("=== ANALYTICS COMPLETE ===\n");
+
+  return analytics;
 }

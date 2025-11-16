@@ -8,13 +8,13 @@ export const StreakDisplay = React.memo(
     return (
       <div
         className={cn(
-          "flex items-center justify-center gap-2",
-          "rounded-lg bg-orange-50 dark:bg-orange-950/20 px-4 py-2",
-          "text-orange-600 dark:text-orange-400 font-medium",
+          "flex items-center justify-center gap-1.5 sm:gap-2",
+          "rounded-lg bg-linear-to-r from-orange-50 to-red-50 px-3 py-1.5 sm:px-4 sm:py-2",
+          "text-orange-600 font-medium text-xs sm:text-sm border border-orange-200",
           className,
         )}
       >
-        <Flame className="h-4 w-4" />
+        <Flame className="h-3 w-3 sm:h-4 sm:w-4" />
         <span>Streak {streakDays} hari</span>
       </div>
     );

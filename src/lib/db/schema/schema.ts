@@ -201,3 +201,15 @@ export const systemLog = pgTable("system_log", {
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// === Analytics Cache (for expensive analytics computations) ===
+export const analyticsCache = pgTable("analytics_cache", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" })
+    .notNull(),
+  timeRangeDays: integer("time_range_days").notNull(), // 7, 30, or 90
+  data: jsonb("data").notNull(), // Cached analytics result
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});

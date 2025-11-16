@@ -30,26 +30,26 @@ export const ChatBubble = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col gap-2",
+          "flex flex-col gap-1.5 sm:gap-2",
           isUser ? "items-end" : "items-start",
           className,
         )}
       >
         <div
           className={cn(
-            "max-w-[80%] rounded-lg px-4 py-2",
+            "max-w-[85%] sm:max-w-[80%] md:max-w-[75%] rounded-lg px-3 py-2 sm:px-4 sm:py-2.5",
             isUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground",
+              ? "bg-linear-to-br from-purple-500 to-pink-500 text-white"
+              : "bg-linear-to-br from-purple-50 to-pink-50 text-foreground border border-purple-100",
           )}
         >
-          <p className="text-sm whitespace-pre-wrap wrap-break-word">
+          <p className="text-xs sm:text-sm md:text-base whitespace-pre-wrap wrap-break-word leading-relaxed">
             {message.content}
           </p>
           <span
             className={cn(
-              "text-xs mt-1 block",
-              isUser ? "opacity-70" : "text-muted-foreground",
+              "text-[10px] sm:text-xs mt-1 block",
+              isUser ? "opacity-80" : "text-muted-foreground",
             )}
           >
             {formattedTime}
@@ -59,9 +59,8 @@ export const ChatBubble = React.memo(
         {!hideButton && suggestsEndConv && onEndSession && (
           <Button
             onClick={handleClick}
-            variant="secondary"
             size="sm"
-            className="text-xs cursor-pointer hover:scale-90 "
+            className="text-[10px] sm:text-xs cursor-pointer hover:scale-95 transition-transform bg-linear-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 px-3 sm:px-4 py-1.5 sm:py-2"
           >
             Ya, akhiri percakapan
           </Button>

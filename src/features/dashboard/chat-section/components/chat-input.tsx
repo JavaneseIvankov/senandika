@@ -25,15 +25,18 @@ export const ChatInput = React.memo(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey){
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleSubmit(e as unknown as React.FormEvent);
       }
     };
 
     return (
-      <CardFooter className={cn("p-4 border-t", className)}>
-        <form onSubmit={handleSubmit} className="flex justify-center items-center gap-2 w-full">
+      <CardFooter className={cn("p-3 sm:p-4 border-t", className)}>
+        <form
+          onSubmit={handleSubmit}
+          className="flex justify-center items-center gap-1.5 sm:gap-2 w-full"
+        >
           {/* Show Summary Button (for ended sessions) */}
           {showSummaryButton && onToggleSummary && (
             <Button
@@ -41,10 +44,10 @@ export const ChatInput = React.memo(
               onClick={onToggleSummary}
               size="icon"
               variant="outline"
-              className="shrink-0"
+              className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 border-purple-200 hover:bg-purple-50"
               title="Lihat Ringkasan Sesi"
             >
-              <BarChart3 className="h-4 w-4" />
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-600" />
             </Button>
           )}
 
@@ -54,19 +57,19 @@ export const ChatInput = React.memo(
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={isLoading || disabled}
-            className="min-h-11 max-h-[120px] resize-none flex-1"
+            className="min-h-9 sm:min-h-11 max-h-[100px] sm:max-h-[120px] resize-none flex-1 text-xs sm:text-sm border-purple-200 focus-visible:ring-purple-400"
             rows={1}
           />
           <Button
             type="submit"
             disabled={isLoading || !value.trim() || disabled}
             size="icon"
-            className="shrink-0"
+            className="shrink-0 h-9 w-9 sm:h-10 sm:w-10 bg-linear-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             )}
           </Button>
         </form>

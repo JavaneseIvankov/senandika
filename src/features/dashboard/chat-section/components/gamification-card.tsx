@@ -9,6 +9,7 @@ import {
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import GamificationStatsCompact from "./gamification-stats-compact";
 import GamificationStatsExpanded from "./gamification-stats-expanded";
 import { useGamificationStats } from "@/hooks/useGamificationStats";
@@ -77,9 +78,9 @@ export default function GamificationStatsCard({
   }
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">Your Progress</CardTitle>
+    <Card className={cn(className, "border-purple-200 bg-linear-to-br from-white to-purple-50/20")}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3">
+        <CardTitle className="text-base sm:text-lg md:text-xl font-semibold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Your Progress</CardTitle>
         <Button
           variant="ghost"
           size="sm"

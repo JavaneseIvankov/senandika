@@ -1,6 +1,6 @@
 /**
  * Gamification Events System
- * 
+ *
  * Custom browser events for real-time gamification updates across components.
  * This allows decoupled components to react to gamification changes without polling.
  */
@@ -31,7 +31,7 @@ export interface GamificationEventDetail {
 /**
  * Emit a gamification stats update event
  * This triggers all listening components to refetch their data
- * 
+ *
  * @param detail - Optional event detail data
  */
 export function emitGamificationUpdate(detail?: GamificationEventDetail): void {
@@ -64,7 +64,7 @@ export function emitLevelUp(level: number, totalXP: number): void {
   });
 
   window.dispatchEvent(event);
-  
+
   // Also emit general stats update
   emitGamificationUpdate({ type: "LEVEL_UP", data: { level, totalXP } });
 }
@@ -85,7 +85,7 @@ export function emitBadgeEarned(badge: string): void {
   });
 
   window.dispatchEvent(event);
-  
+
   // Also emit general stats update
   emitGamificationUpdate({ type: "BADGE_EARNED", data: { badge } });
 }
@@ -107,7 +107,7 @@ export function emitXPGained(xpGained: number, totalXP: number): void {
   });
 
   window.dispatchEvent(event);
-  
+
   // Also emit general stats update
   emitGamificationUpdate({ type: "XP_GAINED", data: { xpGained, totalXP } });
 }
@@ -128,7 +128,7 @@ export function emitStreakUpdated(streakDays: number): void {
   });
 
   window.dispatchEvent(event);
-  
+
   // Also emit general stats update
   emitGamificationUpdate({ type: "STREAK_UPDATED", data: { streakDays } });
 }
@@ -136,12 +136,12 @@ export function emitStreakUpdated(streakDays: number): void {
 /**
  * Hook helper to listen to gamification events
  * Usage: const cleanup = addGamificationListener(() => { refetchData(); });
- * 
+ *
  * @param callback - Function to call when event occurs
  * @returns Cleanup function to remove listener
  */
 export function addGamificationListener(
-  callback: (event: CustomEvent<GamificationEventDetail>) => void
+  callback: (event: CustomEvent<GamificationEventDetail>) => void,
 ): () => void {
   if (typeof window === "undefined") return () => {};
 
