@@ -1,6 +1,5 @@
 import "server-only";
-import { generateText } from "ai";
-import { gemini } from "@/app/lib/ai";
+import { resilientGenerateText } from "@/lib/ai/resilientAI";
 
 /**
  * Query Rewriter for RAG System
@@ -94,8 +93,8 @@ User Query: ${userQuery}
 Rewritten Query (satu baris, keywords saja, tanpa penjelasan):`;
 
   try {
-    const { text } = await generateText({
-      model: gemini("gemini-2.0-flash"),
+    // Call resilient AI to rewrite query (2.5 Flash → 2.0 Flash fallback)
+    const { text } = await resilientGenerateText({
       prompt,
       temperature: 0.3, // Low temperature for consistency
     });

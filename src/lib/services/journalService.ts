@@ -1,7 +1,11 @@
 import "server-only";
 import { db } from "@/lib/db/db";
-import { memory, reflectionSession, rollingSummary } from "@/lib/db/schema/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import {
+  memory,
+  reflectionSession,
+  rollingSummary,
+} from "@/lib/db/schema/schema";
+import { eq, desc, sql, and, isNull, asc } from "drizzle-orm";
 import { getEmbedding } from "./embeddingService";
 import type { RollingSummary } from "./rollingSummaryService";
 
@@ -243,6 +247,38 @@ export async function endSession(
 }
 
 /**
+ * [HOW] Get active (unended) session for user
+ * Returns the most recent session where endedAt is null
+ */
+export async function getActiveSession(
+  userId: string,
+): Promise<ReflectionSessionData | null> {
+  const [session] = await db
+    .select()
+    .from(reflectionSession)
+    .where(
+      and(
+        eq(reflectionSession.userId, userId),
+        isNull(reflectionSession.endedAt),
+      ),
+    )
+    .orderBy(desc(reflectionSession.startedAt))
+    .limit(1);
+
+  if (!session) return null;
+
+  return {
+    id: session.id,
+    userId: session.userId,
+    topic: session.topic,
+    startedAt: session.startedAt,
+    endedAt: session.endedAt,
+    moodAtStart: session.moodAtStart,
+    moodAtEnd: session.moodAtEnd,
+  };
+}
+
+/**
  * [HOW] Get all sessions for a user
  */
 export async function getUserSessions(
@@ -303,9 +339,11 @@ export async function getSessionWithMessages(sessionId: string): Promise<{
  */
 export async function getSessionMessagesForSummary(
   sessionId: string,
-): Promise<Array<{ role: "user" | "assistant"; text: string; timestamp: Date }>> {
+): Promise<
+  Array<{ role: "user" | "assistant"; text: string; timestamp: Date }>
+> {
   const messages = await getMessagesBySession(sessionId);
-  
+
   return messages.map((m) => ({
     role: m.role,
     text: m.text,
