@@ -11,12 +11,12 @@ export const GamificationRewardsSection = React.memo(
     return (
       <div
         className={cn(
-          "space-y-4 rounded-lg border border-primary/20 p-4",
-          "bg-gradient-to-br from-primary/5 to-primary/10",
+          "space-y-3 sm:space-y-4 rounded-lg border border-purple-200 p-3 sm:p-4",
+          "bg-linear-to-br from-purple-50/30 to-pink-50/30",
           className,
         )}
       >
-        <h4 className="text-sm font-semibold text-center">
+        <h4 className="text-xs sm:text-sm font-semibold text-center text-purple-900">
           Pencapaian Hari Ini
         </h4>
 

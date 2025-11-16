@@ -10,7 +10,7 @@ export const SessionStatsGrid = React.memo(
     const hasMoodJourney = stats.moodAtStart && stats.moodAtEnd;
 
     return (
-      <div className={cn("grid grid-cols-2 gap-3", className)}>
+      <div className={cn("grid grid-cols-2 gap-2 sm:gap-3", className)}>
         {/* Duration */}
         <StatCard
           icon={<Clock className="h-5 w-5" />}

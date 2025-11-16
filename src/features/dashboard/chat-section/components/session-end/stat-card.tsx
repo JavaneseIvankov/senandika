@@ -7,17 +7,17 @@ export const StatCard = React.memo(
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center gap-2",
-          "rounded-lg bg-muted/50 p-4",
-          "text-center",
+          "flex flex-col items-center justify-center gap-1.5 sm:gap-2",
+          "rounded-lg bg-linear-to-br from-purple-50/50 to-pink-50/50 border border-purple-100 p-3 sm:p-4",
+          "text-center transition-all hover:shadow-md",
           className,
         )}
       >
-        <div className="text-primary">{icon}</div>
-        <span className="text-xs text-muted-foreground font-medium">
+        <div className="text-purple-600">{icon}</div>
+        <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">
           {label}
         </span>
-        <div className="text-lg font-semibold">{value}</div>
+        <div className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">{value}</div>
       </div>
     );
   },

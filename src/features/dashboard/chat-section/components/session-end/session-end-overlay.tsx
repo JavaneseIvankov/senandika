@@ -22,8 +22,8 @@ export const SessionEndOverlay = React.memo(
       <button
         type="button"
         className={cn(
-          "fixed inset-0 z-50 flex items-center justify-center p-4",
-          "bg-black/50 backdrop-blur-sm",
+          "fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6",
+          "bg-black/40 backdrop-blur-md",
           "animate-in fade-in duration-300",
           "border-none cursor-default",
           className,
@@ -38,7 +38,7 @@ export const SessionEndOverlay = React.memo(
         <div
           role="dialog"
           aria-modal="true"
-          className="animate-in slide-in-from-bottom-4 duration-400"
+          className="animate-in slide-in-from-bottom-4 duration-400 w-full max-w-[95vw] sm:max-w-md"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >

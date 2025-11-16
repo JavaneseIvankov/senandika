@@ -17,8 +17,8 @@ export const SessionSummaryCard = React.memo(
     className,
   }: SessionSummaryCardProps) => {
     return (
-      <Card className={cn("w-full max-w-md", "shadow-2xl", className)}>
-        <CardContent className="p-6 space-y-6">
+      <Card className={cn("w-full", "shadow-2xl border-purple-200 bg-linear-to-br from-white to-purple-50/20", className)}>
+        <CardContent className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
           {/* Header */}
           <SessionEndHeader />
 
