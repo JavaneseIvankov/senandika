@@ -229,8 +229,8 @@ export default function AuthCard() {
         >
           {isSignUp ? (
             <>
-              <h1 className="text-[30px] font-bold">Welcome Back!</h1>
-              <p className="text-[14px] text-center">
+              <h1 className="text-[30px] text-white font-bold">Welcome Back!</h1>
+              <p className="text-[14px] text-white/85 text-center">
                 Enter your personal details to use all of our features
               </p>
               <Button
@@ -243,8 +243,8 @@ export default function AuthCard() {
             </>
           ) : (
             <>
-              <h1 className="text-[30px] font-bold">Hello, Friend!</h1>
-              <p className="text-[14px] text-center">
+              <h1 className="text-[30px] text-white font-bold">Hello, Friend!</h1>
+              <p className="text-[14px] text-white/85 text-center">
                 Register with your personal details to use all of site features
               </p>
               <Button
