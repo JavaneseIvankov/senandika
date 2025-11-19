@@ -1,6 +1,6 @@
 "use server";
 
-import { getCurrentUser } from "@/lib/auth";
+import { withAuth } from "@/lib/action-helpers";
 import {
   generateAndSaveDailySummary,
   getUserInsights,
@@ -12,27 +12,27 @@ import { getSessionWithMessages } from "@/lib/services/journalService";
  * [WHAT] Generate daily summary for a session
  */
 export async function generateSessionSummary(sessionId: string) {
-  const user = await getCurrentUser();
+  return withAuth(async (user) => {
+    // 1. Get all messages from the session
+    const sessionData = await getSessionWithMessages(sessionId);
 
-  // 1. Get all messages from the session
-  const sessionData = await getSessionWithMessages(sessionId);
+    if (!sessionData || sessionData.session.userId !== user.id) {
+      throw new Error("Forbidden: Session does not belong to user");
+    }
 
-  if (!sessionData || sessionData.session.userId !== user.id) {
-    throw new Error("Forbidden: Session does not belong to user");
-  }
+    // 2. Generate and save summary
+    const result = await generateAndSaveDailySummary({
+      userId: user.id,
+      sessionId: sessionId,
+      messages: sessionData.messages.map((m) => ({
+        role: m.role,
+        text: m.text,
+        timestamp: m.createdAt,
+      })),
+    });
 
-  // 2. Generate and save summary
-  const result = await generateAndSaveDailySummary({
-    userId: user.id,
-    sessionId: sessionId,
-    messages: sessionData.messages.map((m) => ({
-      role: m.role,
-      text: m.text,
-      timestamp: m.createdAt,
-    })),
+    return result;
   });
-
-  return result;
 }
 
 /**
@@ -41,23 +41,23 @@ export async function generateSessionSummary(sessionId: string) {
 export async function getMyInsights(
   insightType?: "daily_summary" | "weekly_summary" | "monthly_summary",
 ) {
-  const user = await getCurrentUser();
-  return await getUserInsights(user.id, insightType);
+  return withAuth(async (user) => {
+    return await getUserInsights(user.id, insightType);
+  });
 }
 
 /**
  * [WHAT] Get insight for a specific memory
  */
 export async function getInsightForMemory(memoryId: string) {
-  // Get current user to ensure authorization
-  await getCurrentUser();
+  return withAuth(async (user) => {
+    const insight = await getMemoryInsight(memoryId);
 
-  const insight = await getMemoryInsight(memoryId);
+    if (!insight) {
+      return null;
+    }
 
-  if (!insight) {
-    return null;
-  }
-
-  // TODO: Validate that the memory belongs to the user
-  return insight;
+    // TODO: Validate that the memory belongs to the user
+    return insight;
+  });
 }

@@ -19,8 +19,8 @@ export const ChatMessages = React.memo(
   }: ChatMessagesProps) => {
     return (
       <CardContent className={cn("flex-1 p-0 overflow-hidden", className)}>
-        <ScrollArea 
-          className="w-full h-full" 
+        <ScrollArea
+          className="w-full h-full"
           style={{ maxHeight, height: maxHeight }}
         >
           <div className="p-4 space-y-4">

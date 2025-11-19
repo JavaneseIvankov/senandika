@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getUserGamificationStats } from "@/actions/gamificationActions";
 import { addGamificationListener } from "@/lib/events/gamificationEvents";
+import { useServerActionError } from "@/hooks/use-server-action-error";
 
 // Types
 export interface GamificationStats {
@@ -42,13 +43,16 @@ export function useGamificationStats(): UseGamificationStatsReturn {
   const [stats, setStats] = useState<GamificationStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { handleAction } = useServerActionError();
 
   // Fetch stats function
   const fetchStats = useCallback(async () => {
     try {
       setError(null);
-      const data = await getUserGamificationStats();
-      setStats(data);
+      const data = await handleAction(() => getUserGamificationStats());
+      if (data) {
+        setStats(data);
+      }
     } catch (err) {
       console.error("Failed to fetch gamification stats:", err);
       setError(
@@ -57,7 +61,7 @@ export function useGamificationStats(): UseGamificationStatsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [handleAction]);
 
   // Initial fetch on mount
   useEffect(() => {
