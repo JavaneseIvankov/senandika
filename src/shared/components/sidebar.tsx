@@ -16,11 +16,19 @@ import {
 } from "./ui/sidebar"
 import Link from "next/link"
 import Image from "next/image"
-import { CircleUserRound, MessageCircleMore } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { CircleUserRound, MessageCircleMore, LogOut } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { signOut } from "@/lib/auth-client"
+import { Button } from "./ui/button"
 
 export default function DashboardSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+  };
   
   return (
       <Sidebar> 
@@ -65,7 +73,15 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter>
+        <SidebarFooter className="space-y-2">
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="w-full justify-start border-purple-200 hover:bg-linear-to-r hover:from-purple-50 hover:to-pink-50 text-purple-700 hover:text-purple-900 transition-all cursor-pointer"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
           <p className="text-xs text-muted-foreground px-2">© 2025 Senandika</p>
         </SidebarFooter> 
       </Sidebar>

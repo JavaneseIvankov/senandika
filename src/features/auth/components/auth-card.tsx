@@ -36,10 +36,14 @@ export default function AuthCard() {
         {/* Sign In */}
         <div
           className={`flex flex-col justify-center w-full md:w-[70%] h-auto md:h-full py-8 md:py-12 px-6 md:px-8 gap-4 transition-all duration-700 ease-in-out ${
-            isSignUp ? "hidden md:flex md:opacity-0 md:pointer-events-none" : "flex md:opacity-100"
+            isSignUp
+              ? "hidden md:flex md:opacity-0 md:pointer-events-none"
+              : "flex md:opacity-100"
           }`}
         >
-          <h1 className="text-[24px] md:text-[30px] text-center font-bold">Sign In</h1>
+          <h1 className="text-[24px] md:text-[30px] text-center font-bold">
+            Sign In
+          </h1>
           <Form {...formSignIn}>
             <form onSubmit={formSignIn.handleSubmit(onSignIn)}>
               {/* Username Field */}
@@ -96,7 +100,7 @@ export default function AuthCard() {
                 </Button>
                 <p className="md:hidden text-sm text-center">
                   Don't have an account?{" "}
-                  <button 
+                  <button
                     type="button"
                     className="text-purple-600 font-semibold cursor-pointer hover:underline"
                     onClick={() => setIsSignUp(true)}
@@ -112,10 +116,14 @@ export default function AuthCard() {
         {/* Sign Up */}
         <div
           className={`flex flex-col justify-center w-full md:w-[70%] h-auto md:h-full py-8 md:py-12 px-6 md:px-8 gap-4 transition-all duration-700 ease-in-out ${
-            isSignUp ? "flex md:opacity-100" : "hidden md:flex md:opacity-0 md:pointer-events-none"
+            isSignUp
+              ? "flex md:opacity-100"
+              : "hidden md:flex md:opacity-0 md:pointer-events-none"
           }`}
         >
-          <h1 className="text-[24px] md:text-[30px] text-center font-bold">Sign Up</h1>
+          <h1 className="text-[24px] md:text-[30px] text-center font-bold">
+            Sign Up
+          </h1>
           <Form {...formSignUp}>
             <form onSubmit={formSignUp.handleSubmit(onSignUp)}>
               {/* UserName Field */}
@@ -210,7 +218,7 @@ export default function AuthCard() {
                 </Button>
                 <p className="md:hidden text-sm text-center">
                   Already have an account?{" "}
-                  <button 
+                  <button
                     type="button"
                     className="text-purple-600 font-semibold cursor-pointer hover:underline"
                     onClick={() => setIsSignUp(false)}
@@ -229,8 +237,10 @@ export default function AuthCard() {
         >
           {isSignUp ? (
             <>
-              <h1 className="text-[30px] font-bold">Welcome Back!</h1>
-              <p className="text-[14px] text-center">
+              <h1 className="text-[30px] text-white font-bold">
+                Welcome Back!
+              </h1>
+              <p className="text-[14px] text-white/85 text-center">
                 Enter your personal details to use all of our features
               </p>
               <Button
@@ -243,8 +253,10 @@ export default function AuthCard() {
             </>
           ) : (
             <>
-              <h1 className="text-[30px] font-bold">Hello, Friend!</h1>
-              <p className="text-[14px] text-center">
+              <h1 className="text-[30px] text-white font-bold">
+                Hello, Friend!
+              </h1>
+              <p className="text-[14px] text-white/85 text-center">
                 Register with your personal details to use all of site features
               </p>
               <Button

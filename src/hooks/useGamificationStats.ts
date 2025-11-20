@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getUserGamificationStats } from "@/actions/gamificationActions";
 import { addGamificationListener } from "@/lib/events/gamificationEvents";
+import { useServerActionError } from "@/hooks/use-server-action-error";
 
 // Types
 export interface GamificationStats {
@@ -42,22 +43,25 @@ export function useGamificationStats(): UseGamificationStatsReturn {
   const [stats, setStats] = useState<GamificationStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { handleAction } = useServerActionError();
 
   // Fetch stats function
   const fetchStats = useCallback(async () => {
     try {
       setError(null);
-      const data = await getUserGamificationStats();
-      setStats(data);
+      const data = await handleAction(() => getUserGamificationStats());
+      if (data) {
+        setStats(data);
+      }
     } catch (err) {
-      console.error("Failed to fetch gamification stats:", err);
+      // console.error("Failed to fetch gamification stats:", err);
       setError(
         err instanceof Error ? err.message : "Failed to load statistics",
       );
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [handleAction]);
 
   // Initial fetch on mount
   useEffect(() => {
@@ -67,7 +71,7 @@ export function useGamificationStats(): UseGamificationStatsReturn {
   // Listen to gamification events for real-time updates
   useEffect(() => {
     const cleanup = addGamificationListener((event) => {
-      console.log("🎮 Gamification event detected:", event.detail);
+      // console.log("🎮 Gamification event detected:", event.detail);
       // Refetch stats when event occurs
       fetchStats();
     });

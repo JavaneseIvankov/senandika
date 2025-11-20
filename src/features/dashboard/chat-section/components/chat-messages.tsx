@@ -16,12 +16,14 @@ export const ChatMessages = React.memo(
     maxHeight = "500px",
     className,
     onEndSession,
+    onScroll,
   }: ChatMessagesProps) => {
     return (
       <CardContent className={cn("flex-1 p-0 overflow-hidden", className)}>
-        <ScrollArea 
-          className="w-full h-full" 
+        <ScrollArea
+          className="w-full h-full"
           style={{ maxHeight, height: maxHeight }}
+          onScroll={onScroll}
         >
           <div className="p-4 space-y-4">
             {messages.length === 0 ? (

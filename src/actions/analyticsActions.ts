@@ -1,6 +1,6 @@
 "use server";
 
-import { getCurrentUser } from "@/lib/auth";
+import { withAuth } from "@/lib/action-helpers";
 import { getUserAnalytics } from "@/lib/services/analyticsService";
 
 /**
@@ -13,54 +13,56 @@ import { getUserAnalytics } from "@/lib/services/analyticsService";
  * @returns UserAnalytics with serialized dates
  */
 export async function getAnalytics(days: 7 | 30 | 90 = 7) {
-  // 1. Authentication
-  const user = await getCurrentUser();
+  return withAuth(async (user) => {
+    console.log("=== GET ANALYTICS ACTION ===");
+    console.log("User ID:", user.id);
+    console.log("Time range:", days, "days");
 
-  console.log("=== GET ANALYTICS ACTION ===");
-  console.log("User ID:", user.id);
-  console.log("Time range:", days, "days");
+    try {
+      // Get analytics data
+      const analytics = await getUserAnalytics(user.id, days);
 
-  try {
-    // 2. Get analytics data
-    const analytics = await getUserAnalytics(user.id, days);
+      // Serialize dates to ISO strings for client
+      const serialized = {
+        timeRange: {
+          start: analytics.timeRange.start.toISOString(),
+          end: analytics.timeRange.end.toISOString(),
+          days: analytics.timeRange.days,
+        },
+        sessionStats: analytics.sessionStats,
+        moodTrends: analytics.moodTrends,
+        gamificationSummary: {
+          ...analytics.gamificationSummary,
+          recentBadges: analytics.gamificationSummary.recentBadges.map(
+            (badge) => ({
+              code: badge.code,
+              name: badge.name,
+              earnedAt: badge.earnedAt.toISOString(),
+            }),
+          ),
+        },
+        summaryInsights: analytics.summaryInsights,
+      };
 
-    // 3. Serialize dates to ISO strings for client
-    const serialized = {
-      timeRange: {
-        start: analytics.timeRange.start.toISOString(),
-        end: analytics.timeRange.end.toISOString(),
-        days: analytics.timeRange.days,
-      },
-      sessionStats: analytics.sessionStats,
-      moodTrends: analytics.moodTrends,
-      gamificationSummary: {
-        ...analytics.gamificationSummary,
-        recentBadges: analytics.gamificationSummary.recentBadges.map(
-          (badge) => ({
-            code: badge.code,
-            name: badge.name,
-            earnedAt: badge.earnedAt.toISOString(),
-          }),
-        ),
-      },
-      summaryInsights: analytics.summaryInsights,
-    };
+      console.log("=== ANALYTICS ACTION COMPLETE ===");
+      console.log("Total sessions:", serialized.sessionStats.totalSessions);
+      console.log(
+        "Mood improvement:",
+        serialized.moodTrends.moodImprovementRate + "%",
+      );
+      console.log(
+        "Current level:",
+        serialized.gamificationSummary.currentLevel,
+      );
 
-    console.log("=== ANALYTICS ACTION COMPLETE ===");
-    console.log("Total sessions:", serialized.sessionStats.totalSessions);
-    console.log(
-      "Mood improvement:",
-      serialized.moodTrends.moodImprovementRate + "%",
-    );
-    console.log("Current level:", serialized.gamificationSummary.currentLevel);
-
-    return serialized;
-  } catch (error) {
-    console.error("Error in getAnalytics action:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Failed to get analytics",
-    );
-  }
+      return serialized;
+    } catch (error) {
+      console.error("Error in getAnalytics action:", error);
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to get analytics",
+      );
+    }
+  });
 }
 
 /**

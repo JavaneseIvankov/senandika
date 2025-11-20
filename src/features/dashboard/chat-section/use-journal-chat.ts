@@ -28,6 +28,7 @@ import {
   getUserFriendlyError,
   logErrorDetails,
 } from "@/lib/utils/errorMessages";
+import { useServerActionError } from "@/hooks/use-server-action-error";
 import {
   emitGamificationUpdate,
   emitLevelUp,
@@ -61,6 +62,7 @@ export interface UseJournalChatReturn {
 
   // Refs for scroll management
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  handleScroll: () => void;
 }
 
 export function useJournalChat(): UseJournalChatReturn {
@@ -70,14 +72,19 @@ export function useJournalChat(): UseJournalChatReturn {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const { handleAction } = useServerActionError();
 
   // Session End state
   const [showSessionEndOverlay, setShowSessionEndOverlay] = useState(false);
   const [lastGamificationReward, setLastGamificationReward] =
     useState<GamificationReward | null>(null);
 
+  // Scroll tracking state
+  const [isNearBottom, setIsNearBottom] = useState(true);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const badgeCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Computed session stats
   const sessionStats = useMemo((): SessionStats | null => {
@@ -99,31 +106,43 @@ export function useJournalChat(): UseJournalChatReturn {
     };
   }, [session, messages]);
 
+  // Scroll position detection
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+    // Consider "near bottom" if within 150px of bottom
+    setIsNearBottom(distanceFromBottom < 150);
+  }, []);
+
   // Badge checking with toast notifications
   const checkBadgesAndNotify = useCallback(async () => {
-    try {
-      const { newBadges } = await checkAndAwardBadges({
+    const result = await handleAction(() =>
+      checkAndAwardBadges({
         type: "message_sent",
         sessionId: session?.id,
-      });
+      }),
+    );
 
-      for (const badge of newBadges) {
+    if (result && result.newBadges) {
+      for (const badge of result.newBadges) {
         toast.success(`🏆 Badge Baru!`, {
           description: `${badge.name}: ${badge.description}`,
           duration: 5000,
         });
       }
-    } catch (err) {
-      console.error("Failed to check badges:", err);
     }
-  }, [session]);
+  }, [session, handleAction]);
 
   // Load active session on mount
   useEffect(() => {
     async function loadActiveSession() {
       try {
         setIsLoadingSession(true);
-        const data = await getActiveSessionWithMessages();
+        const data = await handleAction(() => getActiveSessionWithMessages());
 
         if (data) {
           const sessionData = data.session as {
@@ -157,7 +176,7 @@ export function useJournalChat(): UseJournalChatReturn {
     }
 
     loadActiveSession();
-  }, []);
+  }, [handleAction]);
 
   // Badge checking interval (5 minutes)
   useEffect(() => {
@@ -181,13 +200,17 @@ export function useJournalChat(): UseJournalChatReturn {
     };
   }, [session, checkBadgesAndNotify]);
 
-  // Auto-scroll when messages change or loading state changes
+  // Smart auto-scroll - only when user is near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  });
+    // Only scroll if user is near bottom (hasn't scrolled up to read old messages)
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, isNearBottom]);
 
   // Send a message
   const sendMessage = useCallback(
@@ -211,10 +234,26 @@ export function useJournalChat(): UseJournalChatReturn {
       setInput("");
       setError(null);
 
+      // Force scroll when user sends their own message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
+
       startTransition(async () => {
         try {
           // Server action returns plain object directly
-          const data = await sendJournalMessage(session.id, text);
+          const data = await handleAction(() =>
+            sendJournalMessage(session.id, text),
+          );
+
+          if (!data) {
+            // Error was handled by handleAction (auth error), remove user message
+            setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+            return;
+          }
 
           // Add assistant message
           const assistantMessage: Message = {
@@ -272,51 +311,72 @@ export function useJournalChat(): UseJournalChatReturn {
         }
       });
     },
-    [session, checkBadgesAndNotify],
+    [session, checkBadgesAndNotify, handleAction],
   );
 
   // Start new session with mood
-  const startNewSession = useCallback(async (mood: string) => {
-    try {
-      const sessionData = await startJournalSession(mood);
-
-      setSession({
-        id: sessionData.id,
-        startedAt: sessionData.startedAt,
-        endedAt: null,
-        moodAtStart: mood,
-        moodAtEnd: null,
-      });
-      setMessages([]);
-      setError(null);
-
-      // Fetch and display opening message from AI
+  const startNewSession = useCallback(
+    async (mood: string) => {
       try {
-        const openingData = await getOpeningMessage(sessionData.id);
+        const sessionData = await handleAction(() => startJournalSession(mood));
 
-        // Add opening message to chat
-        const openingMessage: Message = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: openingData.fullMessage,
-          timestamp: new Date().toISOString(),
-        };
-        setMessages([openingMessage]);
-      } catch (openingErr) {
-        // Log but don't fail the session creation if opening message fails
-        logErrorDetails(openingErr, "getOpeningMessage");
-        console.error("Failed to get opening message:", openingErr);
-        // Session is still created successfully, just without opening message
+        if (!sessionData) {
+          // Error was handled by handleAction (auth error)
+          return;
+        }
+
+        setSession({
+          id: sessionData.id,
+          startedAt: sessionData.startedAt,
+          endedAt: null,
+          moodAtStart: mood,
+          moodAtEnd: null,
+        });
+        setMessages([]);
+        setError(null);
+
+        // Fetch and display opening message from AI
+        try {
+          const openingData = await handleAction(() =>
+            getOpeningMessage(sessionData.id),
+          );
+
+          if (openingData) {
+            // Add opening message to chat
+            const openingMessage: Message = {
+              id: crypto.randomUUID(),
+              role: "assistant",
+              content: openingData.fullMessage,
+              timestamp: new Date().toISOString(),
+            };
+            setMessages([openingMessage]);
+
+            // Force scroll to show opening message
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+              });
+            }, 100);
+          }
+        } catch (openingErr) {
+          // Log but don't fail the session creation if opening message fails
+          logErrorDetails(openingErr, "getOpeningMessage");
+          // [CLIENT] Commented out for production
+          // console.error("Failed to get opening message:", openingErr);
+          // Session is still created successfully, just without opening message
+        }
+      } catch (err) {
+        // Log internal error details for debugging
+        logErrorDetails(err, "startNewSession");
+
+        // Show user-friendly error message
+        const userFriendlyMessage = getUserFriendlyError(err);
+        setError(userFriendlyMessage);
       }
-    } catch (err) {
-      // Log internal error details for debugging
-      logErrorDetails(err, "startNewSession");
-
-      // Show user-friendly error message
-      const userFriendlyMessage = getUserFriendlyError(err);
-      setError(userFriendlyMessage);
-    }
-  }, []);
+    },
+    [handleAction],
+  );
 
   // Confirm end session
   const confirmEnd = useCallback(async () => {
@@ -324,7 +384,12 @@ export function useJournalChat(): UseJournalChatReturn {
 
     startTransition(async () => {
       try {
-        const data = await confirmEndSession(session.id);
+        const data = await handleAction(() => confirmEndSession(session.id));
+
+        if (!data) {
+          // Error was handled by handleAction (auth error)
+          return;
+        }
 
         // Add closing message
         const closingMessage: Message = {
@@ -385,7 +450,7 @@ export function useJournalChat(): UseJournalChatReturn {
         setError(userFriendlyMessage);
       }
     });
-  }, [session]);
+  }, [session, handleAction]);
 
   // Clear error
   const clearError = useCallback(() => {
@@ -420,5 +485,6 @@ export function useJournalChat(): UseJournalChatReturn {
     closeSessionEndOverlay,
     toggleSessionEndOverlay,
     messagesEndRef,
+    handleScroll,
   };
 }

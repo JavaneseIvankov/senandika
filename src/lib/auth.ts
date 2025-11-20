@@ -5,6 +5,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db/db";
 import { headers } from "next/headers";
 import * as schema from "@/lib/db/schema";
+import { AuthenticationError } from "@/lib/errors";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -26,7 +27,24 @@ export const auth = betterAuth({
 
 /**
  * Get the current authenticated user from the session
- * Throws an error if not authenticated
+ *
+ * @throws {AuthenticationError} If session is invalid, expired, or missing
+ *
+ * Server actions should catch this error and return an error response
+ * that the client can handle with toast + redirect.
+ *
+ * @example
+ * ```ts
+ * try {
+ *   const user = await getCurrentUser();
+ *   // ... use user
+ * } catch (error) {
+ *   if (error instanceof AuthenticationError) {
+ *     return { error: "AUTH_EXPIRED", message: error.message };
+ *   }
+ *   throw error;
+ * }
+ * ```
  */
 export async function getCurrentUser() {
   const session = await auth.api.getSession({
@@ -34,7 +52,9 @@ export async function getCurrentUser() {
   });
 
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    throw new AuthenticationError(
+      "Session expired or invalid. Please log in again.",
+    );
   }
 
   return session.user;

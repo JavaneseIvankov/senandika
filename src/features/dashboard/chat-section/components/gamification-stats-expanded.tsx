@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getUserEarnedBadges } from "@/actions/gamificationActions";
 import { Badge } from "@/shared/components/ui/badge";
 import { Trophy, Zap, Target } from "lucide-react";
+import { useServerActionError } from "@/hooks/use-server-action-error";
 
 interface GamificationStats {
   userId: string;
@@ -37,23 +38,27 @@ export default function GamificationStatsExpanded({
 }: GamificationStatsExpandedProps) {
   const [badges, setBadges] = useState<UserBadge[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(true);
+  const { handleAction } = useServerActionError();
 
   // Fetch badges separately since they're not in the main stats
   useEffect(() => {
     async function loadBadges() {
       try {
         setLoadingBadges(true);
-        const earnedBadges = await getUserEarnedBadges();
-        setBadges(earnedBadges);
-      } catch (error) {
-        console.error("Failed to load badges:", error);
+        const earnedBadges = await handleAction(() => getUserEarnedBadges());
+        if (earnedBadges) {
+          setBadges(earnedBadges);
+        }
+      } catch {
+        // [CLIENT] Commented out for production
+        // console.error("Failed to load badges:", error);
       } finally {
         setLoadingBadges(false);
       }
     }
 
     loadBadges();
-  }, []);
+  }, [handleAction]);
 
   const xpPercentage = stats.progress.progressPercentage;
 
@@ -67,7 +72,8 @@ export default function GamificationStatsExpanded({
             <span className="text-lg font-semibold">Level {stats.level}</span>
           </div>
           <span className="text-sm text-muted-foreground">
-            {stats.progress.xpInCurrentLevel} / {stats.progress.xpNeededForLevel} XP
+            {stats.progress.xpInCurrentLevel} /{" "}
+            {stats.progress.xpNeededForLevel} XP
           </span>
         </div>
 
@@ -90,7 +96,9 @@ export default function GamificationStatsExpanded({
           <Zap className="h-4 w-4 text-orange-500 mt-0.5" />
           <div>
             <p className="text-xs text-orange-600/70">Current Streak</p>
-            <p className="text-lg font-semibold text-orange-700">{stats.streakDays} days</p>
+            <p className="text-lg font-semibold text-orange-700">
+              {stats.streakDays} days
+            </p>
           </div>
         </div>
 
