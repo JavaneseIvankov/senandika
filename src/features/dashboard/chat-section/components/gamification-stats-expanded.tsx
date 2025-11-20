@@ -49,8 +49,9 @@ export default function GamificationStatsExpanded({
         if (earnedBadges) {
           setBadges(earnedBadges);
         }
-      } catch (error) {
-        console.error("Failed to load badges:", error);
+      } catch {
+        // [CLIENT] Commented out for production
+        // console.error("Failed to load badges:", error);
       } finally {
         setLoadingBadges(false);
       }

@@ -63,9 +63,10 @@ export function useServerActionError() {
       }
 
       return result;
-    } catch (error) {
+    } catch {
       // Handle unexpected errors
-      console.error("[CLIENT ERROR]", error);
+      // [CLIENT] Commented out for production
+      // console.error("[CLIENT ERROR]", error);
       toast.error("An unexpected error occurred. Please try again.");
       return null;
     }
@@ -75,9 +76,10 @@ export function useServerActionError() {
   const handleActionError = (error: ActionError) => {
     // Check if we should show this toast (debouncing)
     if (!shouldShowToast(error.error)) {
-      console.log(
-        `[handleActionError] Skipping duplicate toast for: ${error.error}`,
-      );
+      // [CLIENT] Commented out for production
+      // console.log(
+      //   `[handleActionError] Skipping duplicate toast for: ${error.error}`,
+      // );
       return;
     }
 
@@ -138,9 +140,10 @@ export function handleServerActionError(
 
   // Check if we should show this toast (debouncing)
   if (!shouldShowToast(result.error)) {
-    console.log(
-      `[handleServerActionError] Skipping duplicate toast for: ${result.error}`,
-    );
+    // [CLIENT] Commented out for production
+    // console.log(
+    //   `[handleServerActionError] Skipping duplicate toast for: ${result.error}`,
+    // );
     return true; // Still return true as it IS an error
   }
 

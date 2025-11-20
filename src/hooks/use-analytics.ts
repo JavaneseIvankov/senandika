@@ -49,7 +49,8 @@ export function useAnalytics(
         const errorMessage =
           err instanceof Error ? err.message : "Failed to fetch analytics";
         setError(errorMessage);
-        console.error("Error fetching analytics:", err);
+        // [CLIENT] Commented out for production
+        // console.error("Error fetching analytics:", err);
       } finally {
         setIsLoading(false);
       }

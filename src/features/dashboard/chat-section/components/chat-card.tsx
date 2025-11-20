@@ -40,6 +40,7 @@ export default function ChatCard({
     closeSessionEndOverlay,
     toggleSessionEndOverlay,
     messagesEndRef,
+    handleScroll,
   } = useJournalChat();
 
   const handleSendMessage = async (text: string) => {
@@ -111,6 +112,7 @@ export default function ChatCard({
               scrollRef={messagesEndRef}
               maxHeight={maxHeight}
               onEndSession={handleEndSession}
+              onScroll={handleScroll}
             />
 
             {error && <ChatErrorDisplay error={error} onDismiss={clearError} />}

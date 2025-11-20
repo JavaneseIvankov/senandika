@@ -151,6 +151,7 @@ export interface ChatMessagesProps {
   maxHeight?: string;
   className?: string;
   onEndSession?: () => void;
+  onScroll?: () => void;
 }
 
 export interface ChatInputProps {

@@ -62,6 +62,7 @@ export interface UseJournalChatReturn {
 
   // Refs for scroll management
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  handleScroll: () => void;
 }
 
 export function useJournalChat(): UseJournalChatReturn {
@@ -78,8 +79,12 @@ export function useJournalChat(): UseJournalChatReturn {
   const [lastGamificationReward, setLastGamificationReward] =
     useState<GamificationReward | null>(null);
 
+  // Scroll tracking state
+  const [isNearBottom, setIsNearBottom] = useState(true);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const badgeCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Computed session stats
   const sessionStats = useMemo((): SessionStats | null => {
@@ -100,6 +105,18 @@ export function useJournalChat(): UseJournalChatReturn {
       averageStressScore: calculateAverageStress(messages),
     };
   }, [session, messages]);
+
+  // Scroll position detection
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+    // Consider "near bottom" if within 150px of bottom
+    setIsNearBottom(distanceFromBottom < 150);
+  }, []);
 
   // Badge checking with toast notifications
   const checkBadgesAndNotify = useCallback(async () => {
@@ -183,13 +200,17 @@ export function useJournalChat(): UseJournalChatReturn {
     };
   }, [session, checkBadgesAndNotify]);
 
-  // Auto-scroll when messages change or loading state changes
+  // Smart auto-scroll - only when user is near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  });
+    // Only scroll if user is near bottom (hasn't scrolled up to read old messages)
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length, isNearBottom]);
 
   // Send a message
   const sendMessage = useCallback(
@@ -212,6 +233,14 @@ export function useJournalChat(): UseJournalChatReturn {
       setMessages((prev) => [...prev, userMessage]);
       setInput("");
       setError(null);
+
+      // Force scroll when user sends their own message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
 
       startTransition(async () => {
         try {
@@ -321,11 +350,20 @@ export function useJournalChat(): UseJournalChatReturn {
               timestamp: new Date().toISOString(),
             };
             setMessages([openingMessage]);
+
+            // Force scroll to show opening message
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+              });
+            }, 100);
           }
         } catch (openingErr) {
           // Log but don't fail the session creation if opening message fails
           logErrorDetails(openingErr, "getOpeningMessage");
-          console.error("Failed to get opening message:", openingErr);
+          // [CLIENT] Commented out for production
+          // console.error("Failed to get opening message:", openingErr);
           // Session is still created successfully, just without opening message
         }
       } catch (err) {
@@ -447,5 +485,6 @@ export function useJournalChat(): UseJournalChatReturn {
     closeSessionEndOverlay,
     toggleSessionEndOverlay,
     messagesEndRef,
+    handleScroll,
   };
 }

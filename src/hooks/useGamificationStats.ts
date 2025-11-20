@@ -54,7 +54,7 @@ export function useGamificationStats(): UseGamificationStatsReturn {
         setStats(data);
       }
     } catch (err) {
-      console.error("Failed to fetch gamification stats:", err);
+      // console.error("Failed to fetch gamification stats:", err);
       setError(
         err instanceof Error ? err.message : "Failed to load statistics",
       );
@@ -71,7 +71,7 @@ export function useGamificationStats(): UseGamificationStatsReturn {
   // Listen to gamification events for real-time updates
   useEffect(() => {
     const cleanup = addGamificationListener((event) => {
-      console.log("🎮 Gamification event detected:", event.detail);
+      // console.log("🎮 Gamification event detected:", event.detail);
       // Refetch stats when event occurs
       fetchStats();
     });
